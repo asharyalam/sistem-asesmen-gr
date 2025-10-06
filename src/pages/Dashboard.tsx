@@ -4,7 +4,7 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Book } from 'lucide-react';
+import { PlusCircle, Book, Users, ClipboardList } from 'lucide-react'; // Menambahkan Users dan ClipboardList di sini
 
 const Dashboard = () => {
   const { user } = useSession();
