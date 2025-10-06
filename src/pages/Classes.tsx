@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Edit } from 'lucide-react'; // Menambahkan ikon Edit
 import AddClassDialog from '@/components/classes/AddClassDialog';
+import EditClassDialog from '@/components/classes/EditClassDialog'; // Import komponen EditClassDialog
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
@@ -32,6 +33,8 @@ interface Kelas {
 const Classes = () => {
   const { user } = useSession();
   const [isAddClassDialogOpen, setIsAddClassDialogOpen] = useState(false);
+  const [isEditClassDialogOpen, setIsEditClassDialogOpen] = useState(false); // State untuk dialog edit
+  const [classToEdit, setClassToEdit] = useState<Kelas | null>(null); // State untuk data kelas yang akan diedit
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [classToDeleteId, setClassToDeleteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -56,6 +59,15 @@ const Classes = () => {
 
   const handleClassAdded = () => {
     queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after adding a new one
+  };
+
+  const handleEditClick = (kelas: Kelas) => {
+    setClassToEdit(kelas);
+    setIsEditClassDialogOpen(true);
+  };
+
+  const handleClassUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after updating
   };
 
   const handleDeleteClick = (classId: string) => {
@@ -126,8 +138,14 @@ const Classes = () => {
                     <TableCell>{kelas.tahun_semester}</TableCell>
                     <TableCell>{new Date(kelas.created_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
-                      {/* Aksi seperti Edit/Hapus akan ditambahkan di sini */}
-                      <Button variant="ghost" size="sm">Edit</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:bg-primary/10"
+                        onClick={() => handleEditClick(kelas)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -151,6 +169,13 @@ const Classes = () => {
         isOpen={isAddClassDialogOpen}
         onClose={() => setIsAddClassDialogOpen(false)}
         onClassAdded={handleClassAdded}
+      />
+
+      <EditClassDialog
+        isOpen={isEditClassDialogOpen}
+        onClose={() => setIsEditClassDialogOpen(false)}
+        onClassUpdated={handleClassUpdated}
+        classData={classToEdit}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
