@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, Edit, Trash2 } from 'lucide-react';
-import AddStudentDialog from '@/components/students/AddStudentDialog'; // Import komponen AddStudentDialog
+import { PlusCircle, Users, Edit, Trash2, FileUp } from 'lucide-react'; // Menambahkan ikon FileUp
+import AddStudentDialog from '@/components/students/AddStudentDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
@@ -21,7 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import EditStudentDialog from '@/components/students/EditStudentDialog'; // Akan dibuat nanti
+import EditStudentDialog from '@/components/students/EditStudentDialog';
+import ImportStudentsDialog from '@/components/students/ImportStudentsDialog'; // Import komponen ImportStudentsDialog
 
 interface Siswa {
   id: string;
@@ -41,6 +42,7 @@ const Students = () => {
   const [studentToEdit, setStudentToEdit] = useState<Siswa | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [studentToDeleteId, setStudentToDeleteId] = useState<string | null>(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false); // State untuk dialog impor
   const queryClient = useQueryClient();
 
   const { data: students, isLoading, isError, error } = useQuery<Siswa[], Error>({
@@ -70,6 +72,10 @@ const Students = () => {
 
   const handleStudentAdded = () => {
     queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after adding a new one
+  };
+
+  const handleStudentImported = () => {
+    queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after importing
   };
 
   const handleEditClick = (student: Siswa) => {
@@ -118,12 +124,20 @@ const Students = () => {
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Daftar Siswa</CardTitle>
-          <Button
-            onClick={() => setIsAddStudentDialogOpen(true)}
-            className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Siswa Baru
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => setIsImportDialogOpen(true)}
+              className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"
+            >
+              <FileUp className="mr-2 h-4 w-4" /> Impor dari Excel
+            </Button>
+            <Button
+              onClick={() => setIsAddStudentDialogOpen(true)}
+              className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> Tambah Siswa Baru
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -184,7 +198,6 @@ const Students = () => {
         onStudentAdded={handleStudentAdded}
       />
 
-      {/* EditStudentDialog akan ditambahkan di sini */}
       {studentToEdit && (
         <EditStudentDialog
           isOpen={isEditStudentDialogOpen}
@@ -193,6 +206,12 @@ const Students = () => {
           studentData={studentToEdit}
         />
       )}
+
+      <ImportStudentsDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+        onStudentsImported={handleStudentImported}
+      />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="rounded-xl shadow-mac-lg">
