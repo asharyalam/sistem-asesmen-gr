@@ -11,7 +11,8 @@ import Students from "./pages/Students";
 import Assessments from "./pages/Assessments";
 import Attendance from "./pages/Attendance";
 import WeightSettings from "./pages/WeightSettings";
-import ScoreInput from "./pages/ScoreInput"; // Import halaman baru ScoreInput
+import ScoreInput from "./pages/ScoreInput";
+import AttendanceInput from "./pages/AttendanceInput"; // Import halaman baru AttendanceInput
 import { SessionContextProvider } from "./components/auth/SessionContextProvider";
 import AuthLayout from "./components/layout/AuthLayout";
 
@@ -30,8 +31,9 @@ const App = () => (
             <Route path="/classes" element={<AuthLayout><Classes /></AuthLayout>} />
             <Route path="/students" element={<AuthLayout><Students /></AuthLayout>} />
             <Route path="/assessments" element={<AuthLayout><Assessments /></AuthLayout>} />
-            <Route path="/assessments/input-score" element={<AuthLayout><ScoreInput /></AuthLayout>} /> {/* Rute baru untuk input nilai */}
+            <Route path="/assessments/input-score" element={<AuthLayout><ScoreInput /></AuthLayout>} />
             <Route path="/attendance" element={<AuthLayout><Attendance /></AuthLayout>} />
+            <Route path="/attendance/input" element={<AuthLayout><AttendanceInput /></AuthLayout>} /> {/* Rute baru untuk input kehadiran */}
             <Route path="/weight-settings" element={<AuthLayout><WeightSettings /></AuthLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             {/* Protected routes will go inside AuthLayout */}
