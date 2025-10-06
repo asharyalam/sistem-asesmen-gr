@@ -4,13 +4,23 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import AddClassDialog from '@/components/classes/AddClassDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { showError } from '@/utils/toast';
+import { showError, showSuccess } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Kelas {
   id: string;
@@ -22,6 +32,8 @@ interface Kelas {
 const Classes = () => {
   const { user } = useSession();
   const [isAddClassDialogOpen, setIsAddClassDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [classToDeleteId, setClassToDeleteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: classes, isLoading, isError, error } = useQuery<Kelas[], Error>({
@@ -44,6 +56,29 @@ const Classes = () => {
 
   const handleClassAdded = () => {
     queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after adding a new one
+  };
+
+  const handleDeleteClick = (classId: string) => {
+    setClassToDeleteId(classId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClass = async () => {
+    if (!classToDeleteId) return;
+
+    const { error } = await supabase
+      .from('kelas')
+      .delete()
+      .eq('id', classToDeleteId);
+
+    if (error) {
+      showError("Gagal menghapus kelas: " + error.message);
+    } else {
+      showSuccess("Kelas berhasil dihapus!");
+      queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after deletion
+    }
+    setIsDeleteDialogOpen(false);
+    setClassToDeleteId(null);
   };
 
   if (isError) {
@@ -93,7 +128,14 @@ const Classes = () => {
                     <TableCell className="text-right">
                       {/* Aksi seperti Edit/Hapus akan ditambahkan di sini */}
                       <Button variant="ghost" size="sm">Edit</Button>
-                      <Button variant="ghost" size="sm" className="text-destructive">Hapus</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteClick(kelas.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> Hapus
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -110,6 +152,26 @@ const Classes = () => {
         onClose={() => setIsAddClassDialogOpen(false)}
         onClassAdded={handleClassAdded}
       />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="rounded-xl shadow-mac-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus kelas ini secara permanen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteClass}
+              className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
