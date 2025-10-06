@@ -14,6 +14,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import AddAspectDialog from '@/components/assessments/AddAspectDialog';
+import { Badge } from '@/components/ui/badge'; // Import komponen Badge
 
 interface Penilaian {
   id: string;
