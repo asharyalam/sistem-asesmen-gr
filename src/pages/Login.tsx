@@ -20,16 +20,16 @@ const Login = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <p className="text-lg text-gray-700 dark:text-gray-300">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-lg text-foreground">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md bg-card p-8 rounded-2xl shadow-mac-lg">
+        <h2 className="text-2xl font-bold text-center text-foreground mb-6">
           Login ke Sistem Pengelolaan Nilai
         </h2>
         <Auth
@@ -42,11 +42,24 @@ const Login = () => {
                 colors: {
                   brand: 'hsl(var(--primary))',
                   brandAccent: 'hsl(var(--primary-foreground))',
+                  defaultButtonBackground: 'hsl(var(--primary))',
+                  defaultButtonBackgroundHover: 'hsl(var(--primary-foreground))',
+                  defaultButtonBorder: 'hsl(var(--primary))',
+                  defaultButtonText: 'hsl(var(--primary-foreground))',
+                  inputBackground: 'hsl(var(--input))',
+                  inputBorder: 'hsl(var(--border))',
+                  inputBorderHover: 'hsl(var(--ring))',
+                  inputText: 'hsl(var(--foreground))',
+                },
+                radii: {
+                  borderRadiusButton: 'var(--radius)',
+                  button: 'var(--radius)',
+                  input: 'var(--radius)',
                 },
               },
             },
           }}
-          theme="light" // You can make this dynamic based on theme context if needed
+          theme="light"
           redirectTo={window.location.origin + '/'}
         />
       </div>

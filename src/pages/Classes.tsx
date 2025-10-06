@@ -10,19 +10,19 @@ const Classes = () => {
   const { user } = useSession();
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      <h1 className="text-3xl font-bold">Manajemen Kelas</h1>
+    <div className="flex-1 space-y-8 p-4">
+      <h1 className="text-4xl font-extrabold text-foreground">Manajemen Kelas</h1>
       <p className="text-lg text-muted-foreground">
         Di sini Anda dapat melihat, menambah, mengedit, dan menghapus kelas yang Anda ajar.
       </p>
 
-      <Card>
+      <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Daftar Kelas</CardTitle>
+          <CardTitle className="text-lg font-semibold">Daftar Kelas</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Belum ada kelas yang terdaftar.</p>
-          <Button variant="outline" className="mt-4">
+          <Button className="mt-4 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
             <PlusCircle className="mr-2 h-4 w-4" /> Tambah Kelas Baru
           </Button>
         </CardContent>

@@ -24,22 +24,22 @@ const Sidebar = () => {
     {
       name: "Manajemen Siswa",
       icon: Users,
-      path: "/students", // This will be a nested route later, for now a placeholder
+      path: "/students",
     },
     {
       name: "Manajemen Penilaian",
       icon: ClipboardList,
-      path: "/assessments", // Placeholder
+      path: "/assessments",
     },
     {
       name: "Manajemen Kehadiran",
       icon: BarChart3,
-      path: "/attendance", // Placeholder
+      path: "/attendance",
     },
     {
       name: "Pengaturan Bobot",
       icon: Settings,
-      path: "/weight-settings", // Placeholder
+      path: "/weight-settings",
     },
   ];
 
@@ -53,12 +53,12 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64">
+    <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64 shadow-mac-md">
       <div className="flex items-center justify-center h-16 border-b border-sidebar-border mb-6">
-        <span className="text-xl font-bold text-sidebar-primary-foreground whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           Guru IPS App
         </span>
-        <span className="text-xl font-bold text-sidebar-primary-foreground whitespace-nowrap overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 absolute">
+        <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 absolute">
           GIA
         </span>
       </div>
@@ -68,9 +68,9 @@ const Sidebar = () => {
             key={item.name}
             to={item.path}
             className={cn(
-              "flex items-center p-2 rounded-md text-sm font-medium transition-colors duration-200",
+              "flex items-center p-2 rounded-lg text-sm font-medium transition-colors duration-200",
               location.pathname === item.path
-                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-mac-sm"
                 : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             )}
           >
@@ -85,7 +85,7 @@ const Sidebar = () => {
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg"
         >
           <LogOut className="h-5 w-5 mr-3 flex-shrink-0" />
           <span className="whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
