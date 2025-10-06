@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks } from 'lucide-react'; // Menambahkan ikon ListChecks
+import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks } from 'lucide-react';
 import AddAssessmentDialog from '@/components/assessments/AddAssessmentDialog';
 import EditAssessmentDialog from '@/components/assessments/EditAssessmentDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 interface Penilaian {
   id: string;
@@ -35,16 +35,16 @@ interface Penilaian {
   kelas: {
     nama_kelas: string;
   };
-  id_kategori_bobot_akhir: string | null;
-  kategori_bobot: {
-    nama_kategori: string;
-  } | null;
+  // id_kategori_bobot_akhir: string | null; // Removed
+  // kategori_bobot: { // Removed
+  //   nama_kategori: string;
+  // } | null; // Removed
   created_at: string;
 }
 
 const Assessments = () => {
   const { user } = useSession();
-  const navigate = useNavigate(); // Inisialisasi useNavigate
+  const navigate = useNavigate();
   const [isAddAssessmentDialogOpen, setIsAddAssessmentDialogOpen] = useState(false);
   const [isEditAssessmentDialogOpen, setIsEditAssessmentDialogOpen] = useState(false);
   const [assessmentToEdit, setAssessmentToEdit] = useState<Penilaian | null>(null);
@@ -67,8 +67,6 @@ const Assessments = () => {
           kode_tp,
           id_kelas,
           kelas (nama_kelas),
-          id_kategori_bobot_akhir,
-          kategori_bobot (nama_kategori),
           created_at
         `)
         .eq('kelas.id_guru', user.id)
@@ -133,7 +131,7 @@ const Assessments = () => {
           <CardTitle className="text-lg font-semibold">Daftar Penilaian</CardTitle>
           <div className="flex space-x-2">
             <Button
-              onClick={() => navigate('/assessments/input-score')} // Tombol baru untuk input nilai
+              onClick={() => navigate('/assessments/input-score')}
               className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"
             >
               <ListChecks className="mr-2 h-4 w-4" /> Input Nilai
@@ -163,7 +161,6 @@ const Assessments = () => {
                   <TableHead>Jenis</TableHead>
                   <TableHead>Bentuk</TableHead>
                   <TableHead>Kode TP</TableHead>
-                  <TableHead>Kategori Bobot</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -176,7 +173,6 @@ const Assessments = () => {
                     <TableCell>{assessment.jenis_penilaian}</TableCell>
                     <TableCell>{assessment.bentuk_penilaian}</TableCell>
                     <TableCell>{assessment.kode_tp || '-'}</TableCell>
-                    <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
