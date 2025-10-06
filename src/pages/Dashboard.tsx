@@ -4,7 +4,7 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Book } from 'lucide-react'; // Menambahkan Book di sini
 
 const Dashboard = () => {
   const { user } = useSession();
