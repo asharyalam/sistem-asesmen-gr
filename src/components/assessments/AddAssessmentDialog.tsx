@@ -241,11 +241,8 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Harian">Harian</SelectItem>
-                      <SelectItem value="UTS">UTS</SelectItem>
-                      <SelectItem value="UAS">UAS</SelectItem>
-                      <SelectItem value="Proyek">Proyek</SelectItem>
-                      <SelectItem value="Tugas">Tugas</SelectItem>
+                      <SelectItem value="Formatif">Formatif</SelectItem>
+                      <SelectItem value="Sumatif">Sumatif</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -266,9 +263,10 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="Tertulis">Tertulis</SelectItem>
-                      <SelectItem value="Praktik">Praktik</SelectItem>
                       <SelectItem value="Lisan">Lisan</SelectItem>
-                      <SelectItem value="Portofolio">Portofolio</SelectItem>
+                      <SelectItem value="Kinerja">Kinerja</SelectItem>
+                      <SelectItem value="Produk">Produk</SelectItem>
+                      <SelectItem value="Proyek">Proyek</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
