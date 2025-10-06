@@ -1,0 +1,201 @@
+"use client";
+
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { useSession } from '@/components/auth/SessionContextProvider';
+import { showError, showSuccess } from '@/utils/toast';
+import { useQuery } from '@tanstack/react-query';
+
+const formSchema = z.object({
+  nama_siswa: z.string().min(1, { message: "Nama siswa tidak boleh kosong." }),
+  nis_nisn: z.string().min(1, { message: "NIS/NISN tidak boleh kosong." }),
+  id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
+});
+
+interface EditStudentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onStudentUpdated: () => void;
+  studentData: {
+    id: string;
+    nama_siswa: string;
+    nis_nisn: string;
+    id_kelas: string;
+  } | null;
+}
+
+const EditStudentDialog: React.FC<EditStudentDialogProps> = ({ isOpen, onClose, onStudentUpdated, studentData }) => {
+  const { user } = useSession();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nama_siswa: "",
+      nis_nisn: "",
+      id_kelas: "",
+    },
+  });
+
+  useEffect(() => {
+    if (studentData) {
+      form.reset({
+        nama_siswa: studentData.nama_siswa,
+        nis_nisn: studentData.nis_nisn,
+        id_kelas: studentData.id_kelas,
+      });
+    }
+  }, [studentData, form]);
+
+  const { data: classes, isLoading: isLoadingClasses, isError: isErrorClasses, error: classesError } = useQuery<{ id: string; nama_kelas: string }[], Error>({
+    queryKey: ['classesForStudentsEdit', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('kelas')
+        .select('id, nama_kelas')
+        .eq('id_guru', user.id)
+        .order('nama_kelas', { ascending: true });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data || [];
+    },
+    enabled: !!user && isOpen, // Only run query if user is available and dialog is open
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!studentData?.id) {
+      showError("ID siswa tidak ditemukan.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from('siswa')
+      .update({
+        nama_siswa: values.nama_siswa,
+        nis_nisn: values.nis_nisn,
+        id_kelas: values.id_kelas,
+      })
+      .eq('id', studentData.id);
+
+    if (error) {
+      showError("Gagal memperbarui siswa: " + error.message);
+    } else {
+      showSuccess("Siswa berhasil diperbarui!");
+      onStudentUpdated();
+      onClose();
+    }
+  };
+
+  if (isErrorClasses) {
+    showError("Gagal memuat daftar kelas: " + classesError?.message);
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] rounded-xl shadow-mac-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Siswa</DialogTitle>
+          <DialogDescription>
+            Perbarui detail siswa Anda di sini. Klik simpan saat Anda selesai.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            <FormField
+              control={form.control}
+              name="nama_siswa"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nama Siswa</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contoh: Budi Santoso" {...field} className="rounded-lg" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="nis_nisn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>NIS/NISN</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contoh: 1234567890" {...field} className="rounded-lg" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_kelas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kelas</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingClasses}>
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg">
+                        <SelectValue placeholder="Pilih Kelas" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingClasses ? (
+                        <SelectItem value="loading" disabled>Memuat kelas...</SelectItem>
+                      ) : classes && classes.length > 0 ? (
+                        classes.map((kelas) => (
+                          <SelectItem key={kelas.id} value={kelas.id}>
+                            {kelas.nama_kelas}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-classes" disabled>Tidak ada kelas tersedia</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
+                Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default EditStudentDialog;
