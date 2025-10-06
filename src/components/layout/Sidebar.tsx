@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Book, ClipboardList, Settings, LogOut, BarChart3 } from "lucide-react";
+import { Home, Users, Book, ClipboardList, Settings, LogOut, BarChart3, BarChart } from "lucide-react"; // Menambahkan ikon BarChart
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,11 @@ const Sidebar = () => {
       name: "Manajemen Kehadiran",
       icon: BarChart3,
       path: "/attendance",
+    },
+    {
+      name: "Rekap Kehadiran", // Item navigasi baru
+      icon: BarChart, // Ikon baru
+      path: "/attendance/report",
     },
     {
       name: "Pengaturan Bobot",
