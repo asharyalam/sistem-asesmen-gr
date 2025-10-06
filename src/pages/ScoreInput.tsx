@@ -7,14 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Save, ChevronLeft, ListPlus } from 'lucide-react'; // Menambahkan ikon ListPlus
+import { PlusCircle, Save, ChevronLeft, ListPlus, Edit } from 'lucide-react'; // Menambahkan ikon Edit
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import AddAspectDialog from '@/components/assessments/AddAspectDialog';
-import AddMultipleAspectsDialog from '@/components/assessments/AddMultipleAspectsDialog'; // Import dialog baru
+import AddMultipleAspectsDialog from '@/components/assessments/AddMultipleAspectsDialog';
+import EditAspectDialog from '@/components/assessments/EditAspectDialog'; // Import dialog baru
 import { Badge } from '@/components/ui/badge';
 
 interface Penilaian {
@@ -53,7 +54,9 @@ const ScoreInput = () => {
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
   const [scores, setScores] = useState<NilaiSiswa>({});
   const [isAddAspectDialogOpen, setIsAddAspectDialogOpen] = useState(false);
-  const [isAddMultipleAspectsDialogOpen, setIsAddMultipleAspectsDialogOpen] = useState(false); // State untuk dialog multiple aspek
+  const [isAddMultipleAspectsDialogOpen, setIsAddMultipleAspectsDialogOpen] = useState(false);
+  const [isEditAspectDialogOpen, setIsEditAspectDialogOpen] = useState(false); // State untuk dialog edit aspek
+  const [aspectToEdit, setAspectToEdit] = useState<AspekPenilaian | null>(null); // State untuk data aspek yang akan diedit
 
   // Fetch all assessments for the current user
   const { data: assessments, isLoading: isLoadingAssessments, isError: isErrorAssessments, error: assessmentsError } = useQuery<Penilaian[], Error>({
@@ -234,6 +237,15 @@ const ScoreInput = () => {
     }
   };
 
+  const handleEditAspectClick = (aspect: AspekPenilaian) => {
+    setAspectToEdit(aspect);
+    setIsEditAspectDialogOpen(true);
+  };
+
+  const handleAspectUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after updating
+  };
+
   if (isErrorAssessments) {
     showError("Gagal memuat penilaian: " + assessmentsError?.message);
   }
@@ -296,7 +308,7 @@ const ScoreInput = () => {
             <CardTitle className="text-lg font-semibold">Aspek Penilaian</CardTitle>
             <div className="flex space-x-2">
               <Button
-                onClick={() => setIsAddMultipleAspectsDialogOpen(true)} // Tombol baru
+                onClick={() => setIsAddMultipleAspectsDialogOpen(true)}
                 className="rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 shadow-mac-sm"
               >
                 <ListPlus className="mr-2 h-4 w-4" /> Tambah Banyak Aspek
@@ -318,9 +330,19 @@ const ScoreInput = () => {
             ) : aspects && aspects.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {aspects.map(aspect => (
-                  <Badge key={aspect.id} variant="secondary" className="rounded-md px-3 py-1 text-sm">
-                    {aspect.deskripsi} (Max: {aspect.skor_maksimal})
-                  </Badge>
+                  <div key={aspect.id} className="flex items-center gap-1">
+                    <Badge variant="secondary" className="rounded-md px-3 py-1 text-sm">
+                      {aspect.deskripsi} (Max: {aspect.skor_maksimal})
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-muted-foreground hover:text-primary"
+                      onClick={() => handleEditAspectClick(aspect)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -429,6 +451,15 @@ const ScoreInput = () => {
             queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after adding multiple
           }}
           assessmentId={selectedAssessmentId}
+        />
+      )}
+
+      {aspectToEdit && (
+        <EditAspectDialog
+          isOpen={isEditAspectDialogOpen}
+          onClose={() => setIsEditAspectDialogOpen(false)}
+          onAspectUpdated={handleAspectUpdated}
+          aspectData={aspectToEdit}
         />
       )}
     </div>
