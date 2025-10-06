@@ -14,7 +14,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import AddAspectDialog from '@/components/assessments/AddAspectDialog';
-import { Badge } from '@/components/ui/badge'; // Import komponen Badge
+import { Badge } from '@/components/ui/badge';
 
 interface Penilaian {
   id: string;
@@ -247,6 +247,9 @@ const ScoreInput = () => {
 
   const currentAssessment = assessments?.find(a => a.id === selectedAssessmentId);
 
+  // Calculate max total score for the assessment
+  const maxTotalScore = aspects?.reduce((sum, aspect) => sum + aspect.skor_maksimal, 0) || 0;
+
   return (
     <div className="flex-1 space-y-8 p-4">
       <div className="flex items-center gap-4 mb-6">
@@ -340,28 +343,47 @@ const ScoreInput = () => {
                           {aspect.deskripsi} (Max: {aspect.skor_maksimal})
                         </TableHead>
                       ))}
+                      <TableHead className="min-w-[100px] text-center">Total Skor</TableHead>
+                      <TableHead className="min-w-[120px] text-center">Nilai Skala 100</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {students.map(student => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium sticky left-0 bg-card z-10">
-                          {student.nama_siswa} ({student.nis_nisn})
-                        </TableCell>
-                        {aspects.map(aspect => (
-                          <TableCell key={aspect.id} className="text-center">
-                            <Input
-                              type="number"
-                              value={scores[student.id]?.[aspect.id] ?? ''}
-                              onChange={(e) => handleScoreChange(student.id, aspect.id, e.target.value)}
-                              className="w-24 text-center rounded-lg"
-                              min="0"
-                              max={aspect.skor_maksimal}
-                            />
+                    {students.map(student => {
+                      const studentTotalScore = aspects.reduce((sum, aspect) => {
+                        const score = scores[student.id]?.[aspect.id];
+                        return sum + (score !== null && score !== undefined ? score : 0);
+                      }, 0);
+
+                      const convertedScore = maxTotalScore > 0 
+                        ? ((studentTotalScore / maxTotalScore) * 100).toFixed(2)
+                        : '0.00';
+
+                      return (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium sticky left-0 bg-card z-10">
+                            {student.nama_siswa} ({student.nis_nisn})
                           </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
+                          {aspects.map(aspect => (
+                            <TableCell key={aspect.id} className="text-center">
+                              <Input
+                                type="number"
+                                value={scores[student.id]?.[aspect.id] ?? ''}
+                                onChange={(e) => handleScoreChange(student.id, aspect.id, e.target.value)}
+                                className="w-24 text-center rounded-lg"
+                                min="0"
+                                max={aspect.skor_maksimal}
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center font-semibold">
+                            {studentTotalScore}
+                          </TableCell>
+                          <TableCell className="text-center font-semibold">
+                            {convertedScore}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
