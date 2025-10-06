@@ -4,14 +4,14 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Users } from 'lucide-react'; // Menambahkan ikon Users
 
 const Students = () => {
   const { user } = useSession();
 
   return (
     <div className="flex-1 space-y-8 p-4">
-      <h1 className="text-4xl font-extrabold text-foreground">Manajemen Siswa</h1>
+      <h1 className="text-4xl font-extrabold text-studentsAccent-DEFAULT">Manajemen Siswa</h1>
       <p className="text-lg text-muted-foreground">
         Kelola daftar siswa Anda di sini, termasuk menambahkan siswa ke kelas tertentu.
       </p>
@@ -19,6 +19,7 @@ const Students = () => {
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Daftar Siswa</CardTitle>
+          <Users className="h-5 w-5 text-studentsAccent-DEFAULT" /> {/* Menggunakan ikon Users dengan warna aksen */}
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Belum ada siswa yang terdaftar.</p>

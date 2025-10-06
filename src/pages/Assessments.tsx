@@ -4,14 +4,14 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ClipboardList } from 'lucide-react'; // Menambahkan ikon ClipboardList
 
 const Assessments = () => {
   const { user } = useSession();
 
   return (
     <div className="flex-1 space-y-8 p-4">
-      <h1 className="text-4xl font-extrabold text-foreground">Manajemen Penilaian</h1>
+      <h1 className="text-4xl font-extrabold text-assessmentsAccent-DEFAULT">Manajemen Penilaian</h1>
       <p className="text-lg text-muted-foreground">
         Buat dan kelola penilaian untuk kelas Anda, serta masukkan nilai siswa.
       </p>
@@ -19,6 +19,7 @@ const Assessments = () => {
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Daftar Penilaian</CardTitle>
+          <ClipboardList className="h-5 w-5 text-assessmentsAccent-DEFAULT" /> {/* Menggunakan ikon ClipboardList dengan warna aksen */}
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Belum ada penilaian yang dibuat.</p>

@@ -4,14 +4,14 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Book, Users, ClipboardList } from 'lucide-react'; // Menambahkan Users dan ClipboardList di sini
+import { PlusCircle, Book, Users, ClipboardList } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useSession();
 
   return (
     <div className="flex-1 space-y-8 p-4">
-      <h1 className="text-4xl font-extrabold text-foreground">Selamat Datang, {user?.user_metadata?.first_name || user?.email}!</h1>
+      <h1 className="text-4xl font-extrabold text-dashboardAccent-DEFAULT">Selamat Datang, {user?.user_metadata?.first_name || user?.email}!</h1>
       <p className="text-lg text-muted-foreground">
         Ini adalah dashboard Anda. Di sini Anda dapat mengelola kelas, siswa, penilaian, dan kehadiran dengan mudah.
       </p>
@@ -20,7 +20,7 @@ const Dashboard = () => {
         <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Total Kelas</CardTitle>
-            <Book className="h-5 w-5 text-primary" />
+            <Book className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">0</div> {/* Placeholder, will fetch from DB */}
@@ -30,11 +30,10 @@ const Dashboard = () => {
             </Button>
           </CardContent>
         </Card>
-        {/* Add more cards for quick stats like Total Siswa, Penilaian Terbaru, etc. */}
         <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Total Siswa</CardTitle>
-            <Users className="h-5 w-5 text-primary" />
+            <Users className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">0</div>
@@ -47,7 +46,7 @@ const Dashboard = () => {
         <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Penilaian Aktif</CardTitle>
-            <ClipboardList className="h-5 w-5 text-primary" />
+            <ClipboardList className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">0</div>
@@ -59,7 +58,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Placeholder for recent activities or quick links */}
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>

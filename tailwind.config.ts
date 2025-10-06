@@ -62,6 +62,31 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom accent colors for each page
+        dashboardAccent: {
+          DEFAULT: "hsl(210 70% 50%)", // Blueish
+          foreground: "hsl(210 40% 98%)",
+        },
+        classesAccent: {
+          DEFAULT: "hsl(142.1 76.2% 36.3%)", // Greenish
+          foreground: "hsl(210 40% 98%)",
+        },
+        studentsAccent: {
+          DEFAULT: "hsl(262.1 83.3% 57.8%)", // Purplish
+          foreground: "hsl(210 40% 98%)",
+        },
+        assessmentsAccent: {
+          DEFAULT: "hsl(38.5 92.7% 50.6%)", // Orangish
+          foreground: "hsl(210 40% 98%)",
+        },
+        attendanceAccent: {
+          DEFAULT: "hsl(180 70% 40%)", // Teal
+          foreground: "hsl(210 40% 98%)",
+        },
+        weightSettingsAccent: {
+          DEFAULT: "hsl(350 80% 60%)", // Reddish-pink
+          foreground: "hsl(210 40% 98%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -4,14 +4,14 @@ import React from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, Settings } from 'lucide-react'; // Menambahkan ikon Settings
 
 const WeightSettings = () => {
   const { user } = useSession();
 
   return (
     <div className="flex-1 space-y-8 p-4">
-      <h1 className="text-4xl font-extrabold text-foreground">Pengaturan Bobot Penilaian</h1>
+      <h1 className="text-4xl font-extrabold text-weightSettingsAccent-DEFAULT">Pengaturan Bobot Penilaian</h1>
       <p className="text-lg text-muted-foreground">
         Atur bobot untuk berbagai kategori penilaian (misalnya, kehadiran, tugas, ujian) untuk setiap kelas.
       </p>
@@ -19,6 +19,7 @@ const WeightSettings = () => {
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Bobot Kelas</CardTitle>
+          <Settings className="h-5 w-5 text-weightSettingsAccent-DEFAULT" /> {/* Menggunakan ikon Settings dengan warna aksen */}
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Belum ada pengaturan bobot untuk kelas Anda.</p>

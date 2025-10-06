@@ -87,7 +87,7 @@ const Classes = () => {
 
   return (
     <div className="flex-1 space-y-8 p-4">
-      <h1 className="text-4xl font-extrabold text-foreground">Manajemen Kelas</h1>
+      <h1 className="text-4xl font-extrabold text-classesAccent-DEFAULT">Manajemen Kelas</h1>
       <p className="text-lg text-muted-foreground">
         Di sini Anda dapat melihat, menambah, mengedit, dan menghapus kelas yang Anda ajar.
       </p>
