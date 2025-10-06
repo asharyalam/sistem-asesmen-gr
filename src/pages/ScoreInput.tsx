@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Save, ChevronLeft } from 'lucide-react';
+import { PlusCircle, Save, ChevronLeft, ListPlus } from 'lucide-react'; // Menambahkan ikon ListPlus
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import AddAspectDialog from '@/components/assessments/AddAspectDialog';
+import AddMultipleAspectsDialog from '@/components/assessments/AddMultipleAspectsDialog'; // Import dialog baru
 import { Badge } from '@/components/ui/badge';
 
 interface Penilaian {
@@ -52,6 +53,7 @@ const ScoreInput = () => {
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
   const [scores, setScores] = useState<NilaiSiswa>({});
   const [isAddAspectDialogOpen, setIsAddAspectDialogOpen] = useState(false);
+  const [isAddMultipleAspectsDialogOpen, setIsAddMultipleAspectsDialogOpen] = useState(false); // State untuk dialog multiple aspek
 
   // Fetch all assessments for the current user
   const { data: assessments, isLoading: isLoadingAssessments, isError: isErrorAssessments, error: assessmentsError } = useQuery<Penilaian[], Error>({
@@ -292,12 +294,20 @@ const ScoreInput = () => {
         <Card className="rounded-xl shadow-mac-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Aspek Penilaian</CardTitle>
-            <Button
-              onClick={() => setIsAddAspectDialogOpen(true)}
-              className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" /> Tambah Aspek
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => setIsAddMultipleAspectsDialogOpen(true)} // Tombol baru
+                className="rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 shadow-mac-sm"
+              >
+                <ListPlus className="mr-2 h-4 w-4" /> Tambah Banyak Aspek
+              </Button>
+              <Button
+                onClick={() => setIsAddAspectDialogOpen(true)}
+                className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Aspek
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoadingAspects ? (
@@ -407,6 +417,17 @@ const ScoreInput = () => {
             queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after adding
           }}
           onAspectAdded={() => {}} // No specific action needed here, query invalidation handles refresh
+          assessmentId={selectedAssessmentId}
+        />
+      )}
+
+      {selectedAssessmentId && (
+        <AddMultipleAspectsDialog
+          isOpen={isAddMultipleAspectsDialogOpen}
+          onClose={() => setIsAddMultipleAspectsDialogOpen(false)}
+          onAspectsAdded={() => {
+            queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after adding multiple
+          }}
           assessmentId={selectedAssessmentId}
         />
       )}
