@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -41,29 +42,18 @@ interface KategoriBobot {
 }
 
 interface PengaturanBobotKelas {
-  id: string; // Add id for upserting
+  id: string;
   id_kelas: string;
   id_kategori_bobot: string;
   bobot_persentase: number;
 }
-
-// Dynamically create form schema based on available categories
-const createDynamicFormSchema = (categories: KategoriBobot[]) => {
-  const schemaFields: { [key: string]: z.ZodNumber } = {};
-  categories.forEach(category => {
-    schemaFields[`bobot_${category.id}`] = z.coerce.number().min(0).max(100, { message: "Bobot harus antara 0 dan 100." });
-  });
-  return z.object({
-    id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
-    ...schemaFields,
-  });
-};
 
 const WeightSettings = () => {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [isManageCategoriesDialogOpen, setIsManageCategoriesDialogOpen] = useState(false);
+  const [activeCategoryIds, setActiveCategoryIds] = useState<string[]>([]);
 
   // Fetch classes for the current user
   const { data: classes, isLoading: isLoadingClasses, isError: isErrorClasses, error: classesError } = useQuery<Kelas[], Error>({
@@ -118,18 +108,31 @@ const WeightSettings = () => {
     enabled: !!selectedClassId,
   });
 
-  const dynamicFormSchema = categories ? createDynamicFormSchema(categories) : z.object({ id_kelas: z.string() });
+  // Dynamically create form schema based on active categories
+  const dynamicFormSchema = useMemo(() => {
+    const schemaFields: { [key: string]: z.ZodNumber } = {};
+    activeCategoryIds.forEach(categoryId => {
+      schemaFields[`bobot_${categoryId}`] = z.coerce.number().min(0).max(100, { message: "Bobot harus antara 0 dan 100." });
+    });
+    return z.object({
+      id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
+      ...schemaFields,
+    });
+  }, [activeCategoryIds]);
 
   const form = useForm<z.infer<typeof dynamicFormSchema>>({
     resolver: zodResolver(dynamicFormSchema),
     defaultValues: {
       id_kelas: "",
-      // Dynamic default values will be set in useEffect
     },
   });
 
+  // Effect to initialize form and active categories when class, categories, or settings change
   useEffect(() => {
     if (selectedClassId && categories) {
+      const initialActiveIds = weightSettings?.map(ws => ws.id_kategori_bobot) || [];
+      setActiveCategoryIds(initialActiveIds);
+
       const defaultValues: { [key: string]: any } = { id_kelas: selectedClassId };
       categories.forEach(category => {
         const existingWeight = weightSettings?.find(ws => ws.id_kategori_bobot === category.id);
@@ -137,9 +140,24 @@ const WeightSettings = () => {
       });
       form.reset(defaultValues);
     } else if (!selectedClassId) {
-      form.reset({ id_kelas: "" }); // Reset if no class selected
+      setActiveCategoryIds([]);
+      form.reset({ id_kelas: "" });
     }
   }, [selectedClassId, categories, weightSettings, form]);
+
+  const handleCategoryToggle = (categoryId: string, checked: boolean) => {
+    setActiveCategoryIds(prev => {
+      if (checked) {
+        // Add to active, set default value to 0 if not already set
+        form.setValue(`bobot_${categoryId}` as any, form.getValues(`bobot_${categoryId}` as any) ?? 0);
+        return [...prev, categoryId];
+      } else {
+        // Remove from active, clear value in form
+        form.setValue(`bobot_${categoryId}` as any, 0);
+        return prev.filter(id => id !== categoryId);
+      }
+    });
+  };
 
   const onSubmit = async (values: z.infer<typeof dynamicFormSchema>) => {
     if (!user) {
@@ -155,22 +173,44 @@ const WeightSettings = () => {
       return;
     }
 
-    const upsertData = categories.map(category => {
-      const bobotValue = values[`bobot_${category.id}`];
-      return {
-        id_kelas: selectedClassId,
-        id_kategori_bobot: category.id,
-        bobot_persentase: bobotValue,
-      };
+    const upsertData: PengaturanBobotKelas[] = [];
+    const categoriesToKeepIds = new Set<string>();
+
+    // Prepare data for upsert (active categories)
+    activeCategoryIds.forEach(categoryId => {
+      const bobotValue = values[`bobot_${categoryId}`];
+      if (typeof bobotValue === 'number') {
+        upsertData.push({
+          id: weightSettings?.find(ws => ws.id_kategori_bobot === categoryId)?.id || '', // Include existing ID for update
+          id_kelas: selectedClassId,
+          id_kategori_bobot: categoryId,
+          bobot_persentase: bobotValue,
+        });
+        categoriesToKeepIds.add(categoryId);
+      }
     });
 
-    try {
-      const { error } = await supabase
-        .from('pengaturan_bobot_kelas')
-        .upsert(upsertData, { onConflict: 'id_kelas, id_kategori_bobot' });
+    // Identify categories to delete (previously active but now deselected)
+    const categoriesToDeleteIds = weightSettings
+      ?.filter(ws => !categoriesToKeepIds.has(ws.id_kategori_bobot))
+      .map(ws => ws.id) || [];
 
-      if (error) {
-        throw error;
+    try {
+      // Perform deletions first
+      if (categoriesToDeleteIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('pengaturan_bobot_kelas')
+          .delete()
+          .in('id', categoriesToDeleteIds);
+        if (deleteError) throw deleteError;
+      }
+
+      // Perform upserts for active categories
+      if (upsertData.length > 0) {
+        const { error: upsertError } = await supabase
+          .from('pengaturan_bobot_kelas')
+          .upsert(upsertData, { onConflict: 'id_kelas, id_kategori_bobot' });
+        if (upsertError) throw upsertError;
       }
 
       showSuccess("Pengaturan bobot berhasil disimpan!");
@@ -193,9 +233,12 @@ const WeightSettings = () => {
   const isLoading = isLoadingClasses || isLoadingCategories || isLoadingWeightSettings;
 
   const totalCurrentWeight = categories?.reduce((sum, category) => {
-    const fieldName = `bobot_${category.id}`;
-    const value = form.watch(fieldName as any); // Use form.watch to get current value
-    return sum + (typeof value === 'number' ? value : 0);
+    if (activeCategoryIds.includes(category.id)) {
+      const fieldName = `bobot_${category.id}`;
+      const value = form.watch(fieldName as any);
+      return sum + (typeof value === 'number' ? value : 0);
+    }
+    return sum;
   }, 0);
 
   return (
@@ -240,7 +283,7 @@ const WeightSettings = () => {
       {selectedClassId && (
         <Card className="rounded-xl shadow-mac-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">Bobot Penilaian untuk {classes?.find(c => c.id === selectedClassId)?.nama_kelas}</CardTitle>
+            <CardTitle className="text-lg font-semibold">Pilih Kategori & Atur Bobot untuk {classes?.find(c => c.id === selectedClassId)?.nama_kelas}</CardTitle>
             <Settings className="h-5 w-5 text-weightSettingsAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
@@ -252,23 +295,45 @@ const WeightSettings = () => {
               </div>
             ) : categories && categories.length > 0 ? (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                  {categories.map((category) => (
-                    <FormField
-                      key={category.id}
-                      control={form.control}
-                      name={`bobot_${category.id}` as keyof z.infer<typeof dynamicFormSchema>}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Bobot {category.nama_kategori} (%)</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} className="rounded-lg" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
+                <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {categories.map((category) => (
+                      <div key={category.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={activeCategoryIds.includes(category.id)}
+                          onCheckedChange={(checked) => handleCategoryToggle(category.id, checked as boolean)}
+                        />
+                        <Label htmlFor={`category-${category.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          {category.nama_kategori}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeCategoryIds.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 border-t pt-4">
+                      {categories
+                        .filter(category => activeCategoryIds.includes(category.id))
+                        .map((category) => (
+                          <FormField
+                            key={category.id}
+                            control={form.control}
+                            name={`bobot_${category.id}` as keyof z.infer<typeof dynamicFormSchema>}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Bobot {category.nama_kategori} (%)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} className="rounded-lg" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        ))}
+                    </div>
+                  )}
+
                   <div className="md:col-span-2 flex flex-col gap-4">
                     <div className="text-right text-sm font-medium">
                       Total Bobot Saat Ini: <span className={totalCurrentWeight !== 100 ? "text-destructive" : "text-primary"}>{totalCurrentWeight}%</span>
@@ -276,7 +341,7 @@ const WeightSettings = () => {
                         <p className="text-destructive text-xs mt-1">Total bobot harus 100%.</p>
                       )}
                     </div>
-                    <Button type="submit" className="w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm" disabled={totalCurrentWeight !== 100}>
+                    <Button type="submit" className="w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm" disabled={totalCurrentWeight !== 100 || activeCategoryIds.length === 0}>
                       <Save className="mr-2 h-4 w-4" /> Simpan Pengaturan Bobot
                     </Button>
                   </div>
