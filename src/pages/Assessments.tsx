@@ -35,10 +35,10 @@ interface Penilaian {
   kelas: {
     nama_kelas: string;
   };
-  // id_kategori_bobot_akhir: string | null; // Removed
-  // kategori_bobot: { // Removed
-  //   nama_kategori: string;
-  // } | null; // Removed
+  id_kategori_bobot_akhir: string | null;
+  kategori_bobot: {
+    nama_kategori: string;
+  } | null;
   created_at: string;
 }
 
@@ -67,6 +67,8 @@ const Assessments = () => {
           kode_tp,
           id_kelas,
           kelas (nama_kelas),
+          id_kategori_bobot_akhir,
+          kategori_bobot (nama_kategori),
           created_at
         `)
         .eq('kelas.id_guru', user.id)
@@ -161,6 +163,7 @@ const Assessments = () => {
                   <TableHead>Jenis</TableHead>
                   <TableHead>Bentuk</TableHead>
                   <TableHead>Kode TP</TableHead>
+                  <TableHead>Kategori Bobot</TableHead> {/* New column */}
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -173,6 +176,7 @@ const Assessments = () => {
                     <TableCell>{assessment.jenis_penilaian}</TableCell>
                     <TableCell>{assessment.bentuk_penilaian}</TableCell>
                     <TableCell>{assessment.kode_tp || '-'}</TableCell>
+                    <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell> {/* Display category name */}
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

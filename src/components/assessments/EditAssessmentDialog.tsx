@@ -40,6 +40,11 @@ import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery } from '@tanstack/react-query';
 
+interface KategoriBobot {
+  id: string;
+  nama_kategori: string;
+}
+
 const formSchema = z.object({
   id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
   nama_penilaian: z.string().min(1, { message: "Nama penilaian tidak boleh kosong." }),
@@ -47,6 +52,7 @@ const formSchema = z.object({
   jenis_penilaian: z.string().min(1, { message: "Jenis penilaian tidak boleh kosong." }),
   bentuk_penilaian: z.string().min(1, { message: "Bentuk penilaian tidak boleh kosong." }),
   kode_tp: z.string().optional(),
+  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }), // New field
 });
 
 interface EditAssessmentDialogProps {
@@ -61,7 +67,7 @@ interface EditAssessmentDialogProps {
     jenis_penilaian: string;
     bentuk_penilaian: string;
     kode_tp: string | null;
-    id_kategori_bobot_akhir: string | null; // Keep for initial data loading, but won't be used in form
+    id_kategori_bobot_akhir: string | null; // Existing field, now used
   } | null;
 }
 
@@ -76,6 +82,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
       jenis_penilaian: "",
       bentuk_penilaian: "",
       kode_tp: "",
+      id_kategori_bobot_akhir: "", // Default for new field
     },
   });
 
@@ -88,6 +95,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
         jenis_penilaian: assessmentData.jenis_penilaian,
         bentuk_penilaian: assessmentData.bentuk_penilaian,
         kode_tp: assessmentData.kode_tp || "",
+        id_kategori_bobot_akhir: assessmentData.id_kategori_bobot_akhir || "", // Set existing category
       });
     }
   }, [assessmentData, form]);
@@ -110,7 +118,21 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
     enabled: !!user && isOpen,
   });
 
-  // Removed useQuery for weightCategories as it's no longer needed
+  const { data: weightCategories, isLoading: isLoadingWeightCategories } = useQuery<KategoriBobot[], Error>({
+    queryKey: ['weightCategoriesForAssessmentsEdit'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kategori_bobot')
+        .select('id, nama_kategori')
+        .order('nama_kategori', { ascending: true });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data || [];
+    },
+    enabled: isOpen,
+  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!assessmentData?.id) {
@@ -127,7 +149,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
         jenis_penilaian: values.jenis_penilaian,
         bentuk_penilaian: values.bentuk_penilaian,
         kode_tp: values.kode_tp || null,
-        id_kategori_bobot_akhir: null, // Explicitly set to null or remove if column allows
+        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir, // Save selected category
       })
       .eq('id', assessmentData.id);
 
@@ -289,6 +311,36 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
                   <FormControl>
                     <Input placeholder="Contoh: TP-1.1" {...field} className="rounded-lg" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_kategori_bobot_akhir"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kategori Bobot</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingWeightCategories}>
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg">
+                        <SelectValue placeholder="Pilih Kategori Bobot" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingWeightCategories ? (
+                        <SelectItem value="loading" disabled>Memuat kategori...</SelectItem>
+                      ) : weightCategories && weightCategories.length > 0 ? (
+                        weightCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.nama_kategori}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-categories" disabled>Tidak ada kategori tersedia</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

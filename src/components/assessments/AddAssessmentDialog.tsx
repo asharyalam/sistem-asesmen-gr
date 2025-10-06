@@ -40,6 +40,11 @@ import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery } from '@tanstack/react-query';
 
+interface KategoriBobot {
+  id: string;
+  nama_kategori: string;
+}
+
 const formSchema = z.object({
   id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
   nama_penilaian: z.string().min(1, { message: "Nama penilaian tidak boleh kosong." }),
@@ -47,6 +52,7 @@ const formSchema = z.object({
   jenis_penilaian: z.string().min(1, { message: "Jenis penilaian tidak boleh kosong." }),
   bentuk_penilaian: z.string().min(1, { message: "Bentuk penilaian tidak boleh kosong." }),
   kode_tp: z.string().optional(),
+  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }), // New field
 });
 
 interface AddAssessmentDialogProps {
@@ -66,6 +72,7 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
       jenis_penilaian: "",
       bentuk_penilaian: "",
       kode_tp: "",
+      id_kategori_bobot_akhir: "", // Default for new field
     },
   });
 
@@ -87,6 +94,22 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
     enabled: !!user && isOpen,
   });
 
+  const { data: weightCategories, isLoading: isLoadingWeightCategories } = useQuery<KategoriBobot[], Error>({
+    queryKey: ['weightCategoriesForAssessments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kategori_bobot')
+        .select('id, nama_kategori')
+        .order('nama_kategori', { ascending: true });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data || [];
+    },
+    enabled: isOpen,
+  });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
       showError("Anda harus login untuk menambahkan penilaian.");
@@ -102,6 +125,7 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
         jenis_penilaian: values.jenis_penilaian,
         bentuk_penilaian: values.bentuk_penilaian,
         kode_tp: values.kode_tp || null,
+        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir, // Save selected category
       });
 
     if (error) {
@@ -263,6 +287,36 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
                   <FormControl>
                     <Input placeholder="Contoh: TP-1.1" {...field} className="rounded-lg" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_kategori_bobot_akhir"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kategori Bobot</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingWeightCategories}>
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg">
+                        <SelectValue placeholder="Pilih Kategori Bobot" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isLoadingWeightCategories ? (
+                        <SelectItem value="loading" disabled>Memuat kategori...</SelectItem>
+                      ) : weightCategories && weightCategories.length > 0 ? (
+                        weightCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.nama_kategori}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-categories" disabled>Tidak ada kategori tersedia</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
