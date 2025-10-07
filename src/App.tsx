@@ -13,7 +13,8 @@ import Attendance from "./pages/Attendance";
 import WeightSettings from "./pages/WeightSettings";
 import ScoreInput from "./pages/ScoreInput";
 import AttendanceInput from "./pages/AttendanceInput";
-import AttendanceReport from "./pages/AttendanceReport"; // Import halaman baru AttendanceReport
+import AttendanceReport from "./pages/AttendanceReport";
+import StatisticalAnalysis from "./pages/StatisticalAnalysis"; // Import halaman baru StatisticalAnalysis
 import { SessionContextProvider } from "./components/auth/SessionContextProvider";
 import AuthLayout from "./components/layout/AuthLayout";
 
@@ -35,8 +36,9 @@ const App = () => (
             <Route path="/assessments/input-score" element={<AuthLayout><ScoreInput /></AuthLayout>} />
             <Route path="/attendance" element={<AuthLayout><Attendance /></AuthLayout>} />
             <Route path="/attendance/input" element={<AuthLayout><AttendanceInput /></AuthLayout>} />
-            <Route path="/attendance/report" element={<AuthLayout><AttendanceReport /></AuthLayout>} /> {/* Rute baru untuk rekap kehadiran */}
+            <Route path="/attendance/report" element={<AuthLayout><AttendanceReport /></AuthLayout>} />
             <Route path="/weight-settings" element={<AuthLayout><WeightSettings /></AuthLayout>} />
+            <Route path="/statistical-analysis" element={<AuthLayout><StatisticalAnalysis /></AuthLayout>} /> {/* Rute baru untuk analisis statistik */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             {/* Protected routes will go inside AuthLayout */}
             <Route path="*" element={<NotFound />} />
