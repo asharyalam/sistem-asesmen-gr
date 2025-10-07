@@ -141,7 +141,7 @@ const Assessments = () => {
           <div className="flex space-x-2">
             <Button
               onClick={() => navigate('/weight-settings')}
-              className="rounded-lg bg-weightSettingsAccent-DEFAULT text-white hover:bg-weightSettingsAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-weightSettingsAccent-DEFAULT text-weightSettingsAccent-foreground hover:bg-weightSettingsAccent-DEFAULT/90 shadow-mac-sm"
             >
               <Settings className="mr-2 h-4 w-4" /> Pengaturan Bobot
             </Button>
