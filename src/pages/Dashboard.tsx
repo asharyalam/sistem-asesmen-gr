@@ -24,7 +24,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   // Fetch total classes
-  const { data: totalClasses, isLoading: isLoadingClasses } = useQuery<number, Error>({
+  const { data: totalClasses = 0, isLoading: isLoadingClasses } = useQuery<number, Error>({
     queryKey: ['totalClasses', user?.id],
     queryFn: async () => {
       if (!user) return 0;
@@ -40,7 +40,7 @@ const Dashboard = () => {
   });
 
   // Fetch total students (joining with classes to filter by id_guru)
-  const { data: totalStudents, isLoading: isLoadingStudents } = useQuery<number, Error>({
+  const { data: totalStudents = 0, isLoading: isLoadingStudents } = useQuery<number, Error>({
     queryKey: ['totalStudents', user?.id],
     queryFn: async () => {
       if (!user) return 0;
@@ -56,7 +56,7 @@ const Dashboard = () => {
   });
 
   // Fetch total active assessments
-  const { data: totalAssessments, isLoading: isLoadingAssessments } = useQuery<number, Error>({
+  const { data: totalAssessments = 0, isLoading: isLoadingAssessments } = useQuery<number, Error>({
     queryKey: ['totalAssessments', user?.id],
     queryFn: async () => {
       if (!user) return 0;
