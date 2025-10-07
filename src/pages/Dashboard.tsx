@@ -39,36 +39,52 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  // Fetch total students (joining with classes to filter by id_guru)
-  const { data: totalStudents = 0, isLoading: isLoadingStudents } = useQuery<number, Error>({
-    queryKey: ['totalStudents', user?.id],
+  // Fetch class IDs for the current user, to be used by other queries
+  const { data: userClassIds, isLoading: isLoadingUserClassIds } = useQuery<string[], Error>({
+    queryKey: ['userClassIds', user?.id],
     queryFn: async () => {
-      if (!user) return 0;
-      const { count, error } = await supabase
-        .from('siswa')
-        .select('id', { count: 'exact', head: true })
-        .in('id_kelas', supabase.from('kelas').select('id').eq('id_guru', user.id)); // Subquery to get class IDs
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('kelas')
+        .select('id')
+        .eq('id_guru', user.id);
 
       if (error) throw new Error(error.message);
-      return count || 0;
+      return data?.map(c => c.id) || [];
     },
     enabled: !!user,
   });
 
-  // Fetch total active assessments
-  const { data: totalAssessments = 0, isLoading: isLoadingAssessments } = useQuery<number, Error>({
-    queryKey: ['totalAssessments', user?.id],
+  // Fetch total students using the fetched class IDs
+  const { data: totalStudents = 0, isLoading: isLoadingStudents } = useQuery<number, Error>({
+    queryKey: ['totalStudents', user?.id, userClassIds],
     queryFn: async () => {
-      if (!user) return 0;
+      if (!user || !userClassIds || userClassIds.length === 0) return 0;
       const { count, error } = await supabase
-        .from('penilaian')
+        .from('siswa')
         .select('id', { count: 'exact', head: true })
-        .in('id_kelas', supabase.from('kelas').select('id').eq('id_guru', user.id)); // Subquery to get class IDs
+        .in('id_kelas', userClassIds);
 
       if (error) throw new Error(error.message);
       return count || 0;
     },
-    enabled: !!user,
+    enabled: !!user && !isLoadingUserClassIds && userClassIds !== undefined,
+  });
+
+  // Fetch total active assessments using the fetched class IDs
+  const { data: totalAssessments = 0, isLoading: isLoadingAssessments } = useQuery<number, Error>({
+    queryKey: ['totalAssessments', user?.id, userClassIds],
+    queryFn: async () => {
+      if (!user || !userClassIds || userClassIds.length === 0) return 0;
+      const { count, error } = await supabase
+        .from('penilaian')
+        .select('id', { count: 'exact', head: true })
+        .in('id_kelas', userClassIds);
+
+      if (error) throw new Error(error.message);
+      return count || 0;
+    },
+    enabled: !!user && !isLoadingUserClassIds && userClassIds !== undefined,
   });
 
   // Fetch recent activities
@@ -122,7 +138,7 @@ const Dashboard = () => {
             <Users className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
-            {isLoadingStudents ? (
+            {isLoadingStudents || isLoadingUserClassIds ? (
               <Skeleton className="h-8 w-1/4" />
             ) : (
               <div className="text-3xl font-bold text-foreground">{totalStudents}</div>
@@ -141,7 +157,7 @@ const Dashboard = () => {
             <ClipboardList className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
-            {isLoadingAssessments ? (
+            {isLoadingAssessments || isLoadingUserClassIds ? (
               <Skeleton className="h-8 w-1/4" />
             ) : (
               <div className="text-3xl font-bold text-foreground">{totalAssessments}</div>
