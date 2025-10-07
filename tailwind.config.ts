@@ -62,7 +62,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom accent colors for each page
+        // Custom accent colors for each page - MADE MORE VIBRANT
         dashboardAccent: {
           DEFAULT: "hsl(210 70% 50%)", // Blueish
           foreground: "hsl(210 40% 98%)",
@@ -72,7 +72,7 @@ export default {
           foreground: "hsl(210 40% 98%)",
         },
         studentsAccent: {
-          DEFAULT: "hsl(262.1 83.3% 57.8%)", // Purplish
+          DEFAULT: "hsl(262.1 90% 50%)", // More vibrant Purplish
           foreground: "hsl(210 40% 98%)",
         },
         assessmentsAccent: {
@@ -80,11 +80,11 @@ export default {
           foreground: "hsl(210 40% 98%)",
         },
         attendanceAccent: {
-          DEFAULT: "hsl(180 70% 40%)", // Teal
+          DEFAULT: "hsl(180 80% 35%)", // More vibrant Teal
           foreground: "hsl(210 40% 98%)",
         },
         weightSettingsAccent: {
-          DEFAULT: "hsl(350 80% 60%)", // Reddish-pink
+          DEFAULT: "hsl(350 90% 55%)", // More vibrant Reddish-pink
           foreground: "hsl(210 40% 98%)",
         },
       },

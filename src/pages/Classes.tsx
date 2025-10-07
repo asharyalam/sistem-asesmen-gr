@@ -119,13 +119,13 @@ const Classes = () => {
           <div className="flex space-x-2">
             <Button
               onClick={() => navigate('/students')}
-              className="rounded-lg bg-studentsAccent-DEFAULT text-primary-foreground hover:bg-studentsAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-studentsAccent-DEFAULT text-white hover:bg-studentsAccent-DEFAULT/90 shadow-mac-sm"
             >
               <Users className="mr-2 h-4 w-4" /> Kelola Siswa
             </Button>
             <Button
               onClick={() => navigate('/attendance')}
-              className="rounded-lg bg-attendanceAccent-DEFAULT text-primary-foreground hover:bg-attendanceAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-attendanceAccent-DEFAULT text-white hover:bg-attendanceAccent-DEFAULT/90 shadow-mac-sm"
             >
               <BarChart3 className="mr-2 h-4 w-4" /> Kelola Kehadiran
             </Button>
