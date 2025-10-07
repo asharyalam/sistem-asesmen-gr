@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Save, Settings, ListPlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import *as z from 'zod';
 import {
   Form,
   FormControl,
@@ -128,6 +128,9 @@ const WeightSettings = () => {
     },
   });
 
+  // Watch all form values to ensure reactivity for totalCurrentWeight
+  const allFormValues = form.watch();
+
   // Effect to initialize form and active categories when class, categories, or settings change
   useEffect(() => {
     if (selectedClassId && categories) {
@@ -151,7 +154,7 @@ const WeightSettings = () => {
     setActiveCategoryIds(prev => {
       if (checked) {
         // Add to active, set default value to 0 if not already set
-        form.setValue(`bobot_${categoryId}` as any, form.getValues(`bobot_${categoryId}` as any) ?? 0);
+        form.setValue(`bobot_${categoryId}` as any, allFormValues[`bobot_${categoryId}`] ?? 0);
         return [...prev, categoryId];
       } else {
         // Remove from active, clear value in form
@@ -237,7 +240,7 @@ const WeightSettings = () => {
   const totalCurrentWeight = categories?.reduce((sum, category) => {
     if (activeCategoryIds.includes(category.id)) {
       const fieldName = `bobot_${category.id}`;
-      const value = form.watch(fieldName as any);
+      const value = allFormValues[fieldName]; // Access from allFormValues
       return sum + (typeof value === 'number' ? value : 0);
     }
     return sum;
