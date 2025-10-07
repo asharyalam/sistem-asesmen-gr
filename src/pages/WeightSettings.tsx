@@ -238,17 +238,22 @@ const WeightSettings = () => {
   const isLoading = isLoadingClasses || isLoadingCategories || isLoadingWeightSettings;
 
   const totalCurrentWeight = useMemo(() => {
-    return categories?.reduce((sum, category) => {
+    if (!categories) return 0;
+
+    let sum = 0;
+    categories.forEach(category => {
       if (activeCategoryIds.includes(category.id)) {
         const fieldName = `bobot_${category.id}`;
-        const value = allFormValues[fieldName];
-        // Explicitly parse the value to a number, default to 0 if it's not a valid number
-        const numericValue = parseFloat(value as string) || 0;
-        return sum + numericValue;
+        const value = form.getValues(fieldName); // Get the raw value from the form
+        // Explicitly convert to number, handling potential string values or NaN
+        const numericValue = Number(value); 
+        if (!isNaN(numericValue)) {
+          sum += numericValue;
+        }
       }
-      return sum;
-    }, 0) || 0;
-  }, [allFormValues, activeCategoryIds, categories]);
+    });
+    return sum;
+  }, [activeCategoryIds, categories, form]); // Keep 'form' as a dependency
 
   return (
     <div className="flex-1 space-y-8 p-4">
