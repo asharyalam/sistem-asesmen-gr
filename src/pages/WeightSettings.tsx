@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
-import { Card, CardContent, CardHeader, CardTitle } = '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Save, Settings, ListPlus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import *as z from 'zod';
+import * as z from 'zod';
 import {
   Form,
   FormControl,
@@ -214,7 +214,7 @@ const WeightSettings = () => {
       if (upsertData.length > 0) {
         const { error: upsertError } = await supabase
           .from('pengaturan_bobot_kelas')
-          .upsert(upsertData, { onConflict: 'id_kelas, id_kategori_bobot' }); // Corrected onConflict clause
+          .upsert(upsertData, { onConflict: 'id_kelas, id_kategori_bobot' });
         if (upsertError) throw upsertError;
       }
 
