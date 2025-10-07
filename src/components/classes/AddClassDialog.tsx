@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -41,7 +41,7 @@ interface AddClassDialogProps {
 
 const AddClassDialog: React.FC<AddClassDialogProps> = ({ isOpen, onClose, onClassAdded }) => {
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,8 +73,8 @@ const AddClassDialog: React.FC<AddClassDialogProps> = ({ isOpen, onClose, onClas
       onClose();
       form.reset();
 
-      // Log activity
-      await logActivity(user, 'CLASS_ADDED', `Menambahkan kelas baru: ${values.nama_kelas} (${values.tahun_semester})`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'CLASS_ADDED', `Menambahkan kelas baru: ${values.nama_kelas} (${values.tahun_semester})`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] }); // Invalidate total classes
     }
   };

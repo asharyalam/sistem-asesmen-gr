@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { CalendarIcon, Save, ChevronLeft } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,7 +44,7 @@ interface AttendanceStatus {
 const AttendanceInput = () => {
   const { user } = useSession();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -157,9 +157,9 @@ const AttendanceInput = () => {
 
       showSuccess("Kehadiran berhasil disimpan!");
       queryClient.invalidateQueries({ queryKey: ['existingAttendance', selectedClassId, selectedDate] });
-      // Log activity
+      // Log activity, passing queryClient
       const className = classes?.find(c => c.id === selectedClassId)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'ATTENDANCE_SAVED', `Menyimpan catatan kehadiran untuk kelas ${className} pada tanggal ${formattedDate}`);
+      await logActivity(user, 'ATTENDANCE_SAVED', `Menyimpan catatan kehadiran untuk kelas ${className} pada tanggal ${formattedDate}`, queryClient);
     } catch (error: any) {
       showError("Gagal menyimpan kehadiran: " + error.message);
     } finally {

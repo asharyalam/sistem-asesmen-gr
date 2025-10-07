@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -47,6 +48,7 @@ interface EditAspectDialogProps {
 
 const EditAspectDialog: React.FC<EditAspectDialogProps> = ({ isOpen, onClose, onAspectUpdated, aspectData }) => {
   const { user } = useSession(); // Get user from session
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,8 +93,8 @@ const EditAspectDialog: React.FC<EditAspectDialogProps> = ({ isOpen, onClose, on
       showSuccess("Aspek penilaian berhasil diperbarui!");
       onAspectUpdated();
       onClose();
-      // Log activity
-      await logActivity(user, 'ASPECT_UPDATED', `Memperbarui aspek penilaian: ${aspectData.deskripsi} menjadi ${values.deskripsi} (ID: ${aspectData.id})`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'ASPECT_UPDATED', `Memperbarui aspek penilaian: ${aspectData.deskripsi} menjadi ${values.deskripsi} (ID: ${aspectData.id})`, queryClient);
     }
   };
 

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { showLoading, dismissToast, showError } from '@/utils/toast';
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 
 interface SessionContextType {
   session: Session | null;
@@ -20,6 +21,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   useEffect(() => {
     let toastId: string | undefined;
@@ -32,11 +34,11 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
         if (toastId) dismissToast(toastId);
         navigate('/'); // Redirect to dashboard after login
         if (currentSession?.user) {
-          await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`);
+          await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`, queryClient);
         }
       } else if (event === 'SIGNED_OUT') {
         if (user) { // Log logout for the user who was signed in
-          await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`);
+          await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`, queryClient);
         }
         setSession(null);
         setUser(null);
@@ -85,7 +87,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       subscription.unsubscribe();
       if (toastId) dismissToast(toastId);
     };
-  }, [navigate, user]); // Added user to dependency array to ensure logout log works correctly
+  }, [navigate, user, queryClient]); // Added queryClient to dependency array
 
   return (
     <SessionContext.Provider value={{ session, user, loading }}>

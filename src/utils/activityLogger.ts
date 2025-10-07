@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { QueryClient } from '@tanstack/react-query'; // Import QueryClient type
 import { showError } from './toast';
-import { useQueryClient } from '@tanstack/react-query';
 
 export type ActivityType = 
   | 'CLASS_ADDED'
@@ -26,7 +26,7 @@ export type ActivityType =
   | 'LOGIN'
   | 'LOGOUT';
 
-export const logActivity = async (user: User | null, activity_type: ActivityType, description: string) => {
+export const logActivity = async (user: User | null, activity_type: ActivityType, description: string, queryClient: QueryClient) => {
   if (!user) {
     console.warn("Attempted to log activity without a user session.");
     return;
@@ -44,7 +44,6 @@ export const logActivity = async (user: User | null, activity_type: ActivityType
     // showError("Gagal mencatat aktivitas: " + error.message);
   } else {
     // Invalidate the recent activities query to refresh the dashboard
-    const queryClient = useQueryClient();
     queryClient.invalidateQueries({ queryKey: ['recentActivities', user.id] });
   }
 };

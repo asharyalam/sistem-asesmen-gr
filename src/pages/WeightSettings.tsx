@@ -28,7 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { Skeleton } from '@/components/ui/skeleton';
 import ManageWeightCategoriesDialog from '@/components/weight-settings/ManageWeightCategoriesDialog';
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
@@ -52,7 +52,7 @@ interface PengaturanBobotKelas {
 
 const WeightSettings = () => {
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [isManageCategoriesDialogOpen, setIsManageCategoriesDialogOpen] = useState(false);
   const [activeCategoryIds, setActiveCategoryIds] = useState<string[]>([]);
@@ -186,7 +186,7 @@ const WeightSettings = () => {
     activeCategoryIds.forEach(categoryId => {
       const bobotValue = values[`bobot_${categoryId}`];
       if (typeof bobotValue === 'number' && bobotValue >= 0 && bobotValue <= 100) {
-        const existingSetting = weightSettings?.find(ws => ws.id_kategori_bobot === categoryId);
+        const existingSetting = weightSettings?.find(ws => ws.id_kategori_bobot === category.id);
         const recordToUpsert: Partial<PengaturanBobotKelas> = {
           id_kelas: selectedClassId,
           id_kategori_bobot: categoryId,
@@ -225,9 +225,9 @@ const WeightSettings = () => {
 
       showSuccess("Pengaturan bobot berhasil disimpan!");
       queryClient.invalidateQueries({ queryKey: ['weightSettings', selectedClassId] });
-      // Log activity
+      // Log activity, passing queryClient
       const className = classes?.find(c => c.id === selectedClassId)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'WEIGHT_SETTINGS_SAVED', `Menyimpan pengaturan bobot untuk kelas ${className}`);
+      await logActivity(user, 'WEIGHT_SETTINGS_SAVED', `Menyimpan pengaturan bobot untuk kelas ${className}`, queryClient);
     } catch (error: any) {
       showError("Gagal menyimpan pengaturan bobot: " + error.message);
     }

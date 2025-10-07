@@ -5,12 +5,13 @@ import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Book, Users, ClipboardList, History } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale'; // Import locale for Indonesian date formatting
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface ActivityLog {
   id: string;
@@ -22,6 +23,7 @@ interface ActivityLog {
 const Dashboard = () => {
   const { user } = useSession();
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   // Fetch total classes
   const { data: totalClasses = 0, isLoading: isLoadingClasses } = useQuery<number, Error>({

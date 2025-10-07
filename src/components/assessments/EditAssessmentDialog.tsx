@@ -38,7 +38,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface KategoriBobot {
@@ -74,6 +74,7 @@ interface EditAssessmentDialogProps {
 
 const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onClose, onAssessmentUpdated, assessmentData }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -160,10 +161,10 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
       showSuccess("Penilaian berhasil diperbarui!");
       onAssessmentUpdated();
       onClose();
-      // Log activity
+      // Log activity, passing queryClient
       const oldClassName = classes?.find(c => c.id === assessmentData.id_kelas)?.nama_kelas || 'Unknown Class';
       const newClassName = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'ASSESSMENT_UPDATED', `Memperbarui penilaian: ${assessmentData.nama_penilaian} (Kelas: ${oldClassName}) menjadi ${values.nama_penilaian} (Kelas: ${newClassName})`);
+      await logActivity(user, 'ASSESSMENT_UPDATED', `Memperbarui penilaian: ${assessmentData.nama_penilaian} (Kelas: ${oldClassName}) menjadi ${values.nama_penilaian} (Kelas: ${newClassName})`, queryClient);
     }
   };
 

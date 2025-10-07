@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Save, ChevronLeft, ListPlus, Edit } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,7 +50,7 @@ interface NilaiSiswa {
 const ScoreInput = () => {
   const { user } = useSession();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
   const [scores, setScores] = useState<NilaiSiswa>({});
@@ -231,8 +231,8 @@ const ScoreInput = () => {
 
       showSuccess("Nilai berhasil disimpan!");
       queryClient.invalidateQueries({ queryKey: ['existingScores', selectedAssessmentId] });
-      // Log activity
-      await logActivity(user, 'SCORE_SAVED', `Menyimpan nilai untuk penilaian: ${currentAssessment?.nama_penilaian} (${currentAssessment?.kelas?.nama_kelas})`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'SCORE_SAVED', `Menyimpan nilai untuk penilaian: ${currentAssessment?.nama_penilaian} (${currentAssessment?.kelas?.nama_kelas})`, queryClient);
     } catch (error: any) {
       showError("Gagal menyimpan nilai: " + error.message);
     }

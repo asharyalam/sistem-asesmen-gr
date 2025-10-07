@@ -32,7 +32,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -49,7 +49,7 @@ interface AddStudentDialogProps {
 
 const AddStudentDialog: React.FC<AddStudentDialogProps> = ({ isOpen, onClose, onStudentAdded }) => {
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,9 +99,9 @@ const AddStudentDialog: React.FC<AddStudentDialogProps> = ({ isOpen, onClose, on
       onClose();
       form.reset();
 
-      // Log activity
+      // Log activity, passing queryClient
       const className = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'STUDENT_ADDED', `Menambahkan siswa baru: ${values.nama_siswa} (${values.nis_nisn}) ke kelas ${className}`);
+      await logActivity(user, 'STUDENT_ADDED', `Menambahkan siswa baru: ${values.nama_siswa} (${values.nis_nisn}) ke kelas ${className}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] });
     }
   };

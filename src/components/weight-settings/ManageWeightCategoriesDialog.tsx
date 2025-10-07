@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, PlusCircle, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,7 +57,7 @@ interface ManageWeightCategoriesDialogProps {
 
 const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> = ({ isOpen, onClose }) => {
   const { user } = useSession(); // Get user from session
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
   const [isAdding, setIsAdding] = useState(false);
   const [editingCategory, setEditingCategory] = useState<KategoriBobot | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -115,8 +115,8 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
         queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
         setEditingCategory(null);
         form.reset();
-        // Log activity
-        await logActivity(user, 'WEIGHT_CATEGORY_UPDATED', `Memperbarui kategori bobot: ${editingCategory.nama_kategori} menjadi ${values.nama_kategori}`);
+        // Log activity, passing queryClient
+        await logActivity(user, 'WEIGHT_CATEGORY_UPDATED', `Memperbarui kategori bobot: ${editingCategory.nama_kategori} menjadi ${values.nama_kategori}`, queryClient);
       }
     } else {
       // Add new category
@@ -131,8 +131,8 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
         queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
         form.reset();
         setIsAdding(false);
-        // Log activity
-        await logActivity(user, 'WEIGHT_CATEGORY_ADDED', `Menambahkan kategori bobot baru: ${values.nama_kategori}`);
+        // Log activity, passing queryClient
+        await logActivity(user, 'WEIGHT_CATEGORY_ADDED', `Menambahkan kategori bobot baru: ${values.nama_kategori}`, queryClient);
       }
     }
   };
@@ -149,8 +149,8 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
       showError("Gagal menghapus kategori: " + error.message);
     } else {
       showSuccess("Kategori berhasil dihapus!");
-      // Log activity
-      await logActivity(user, 'WEIGHT_CATEGORY_DELETED', `Menghapus kategori bobot: ${categoryToDeleteName}`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'WEIGHT_CATEGORY_DELETED', `Menghapus kategori bobot: ${categoryToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
     }
     setIsDeleteDialogOpen(false);

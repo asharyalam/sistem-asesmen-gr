@@ -32,7 +32,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -55,6 +55,7 @@ interface EditStudentDialogProps {
 
 const EditStudentDialog: React.FC<EditStudentDialogProps> = ({ isOpen, onClose, onStudentUpdated, studentData }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -113,10 +114,10 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({ isOpen, onClose, 
       showSuccess("Siswa berhasil diperbarui!");
       onStudentUpdated();
       onClose();
-      // Log activity
+      // Log activity, passing queryClient
       const oldClassName = classes?.find(c => c.id === studentData.id_kelas)?.nama_kelas || 'Unknown Class';
       const newClassName = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'STUDENT_UPDATED', `Memperbarui siswa: ${studentData.nama_siswa} (NIS/NISN: ${studentData.nis_nisn}) dari kelas ${oldClassName} ke kelas ${newClassName}`);
+      await logActivity(user, 'STUDENT_UPDATED', `Memperbarui siswa: ${studentData.nama_siswa} (NIS/NISN: ${studentData.nis_nisn}) dari kelas ${oldClassName} ke kelas ${newClassName}`, queryClient);
     }
   };
 

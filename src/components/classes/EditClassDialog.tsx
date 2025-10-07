@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useSession } from '@/components/auth/SessionContextProvider';
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -45,6 +46,7 @@ interface EditClassDialogProps {
 
 const EditClassDialog: React.FC<EditClassDialogProps> = ({ isOpen, onClose, onClassUpdated, classData }) => {
   const { user } = useSession(); // Get user from session
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,8 +84,8 @@ const EditClassDialog: React.FC<EditClassDialogProps> = ({ isOpen, onClose, onCl
       showSuccess("Kelas berhasil diperbarui!");
       onClassUpdated();
       onClose();
-      // Log activity
-      await logActivity(user, 'CLASS_UPDATED', `Memperbarui kelas: ${classData.nama_kelas} menjadi ${values.nama_kelas} (${values.tahun_semester})`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'CLASS_UPDATED', `Memperbarui kelas: ${classData.nama_kelas} menjadi ${values.nama_kelas} (${values.tahun_semester})`, queryClient);
     }
   };
 

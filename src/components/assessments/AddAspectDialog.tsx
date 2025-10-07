@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
@@ -42,6 +43,7 @@ interface AddAspectDialogProps {
 
 const AddAspectDialog: React.FC<AddAspectDialogProps> = ({ isOpen, onClose, onAspectAdded, assessmentId }) => {
   const { user } = useSession(); // Get user from session
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,8 +75,8 @@ const AddAspectDialog: React.FC<AddAspectDialogProps> = ({ isOpen, onClose, onAs
       onAspectAdded();
       onClose();
       form.reset();
-      // Log activity
-      await logActivity(user, 'ASPECT_ADDED', `Menambahkan aspek penilaian: ${values.deskripsi} untuk penilaian ID: ${assessmentId}`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'ASPECT_ADDED', `Menambahkan aspek penilaian: ${values.deskripsi} untuk penilaian ID: ${assessmentId}`, queryClient);
     }
   };
 

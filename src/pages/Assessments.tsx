@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks } from 'lucide-react';
 import AddAssessmentDialog from '@/components/assessments/AddAssessmentDialog';
 import EditAssessmentDialog from '@/components/assessments/EditAssessmentDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -52,7 +52,7 @@ const Assessments = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assessmentToDeleteId, setAssessmentToDeleteId] = useState<string | null>(null);
   const [assessmentToDeleteName, setAssessmentToDeleteName] = useState<string | null>(null); // State to store assessment name for logging
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   const { data: assessments, isLoading, isError, error } = useQuery<Penilaian[], Error>({
     queryKey: ['assessments', user?.id],
@@ -114,8 +114,8 @@ const Assessments = () => {
     if (error) {
       showError("Gagal menghapus penilaian: " + error.message);
     } else {
-      // Log activity
-      await logActivity(user, 'ASSESSMENT_DELETED', `Menghapus penilaian: ${assessmentToDeleteName}`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'ASSESSMENT_DELETED', `Menghapus penilaian: ${assessmentToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['assessments', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] });
     }

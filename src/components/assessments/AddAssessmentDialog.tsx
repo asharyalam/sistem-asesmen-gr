@@ -38,7 +38,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface KategoriBobot {
@@ -64,7 +64,7 @@ interface AddAssessmentDialogProps {
 
 const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClose, onAssessmentAdded }) => {
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -138,9 +138,9 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
       onClose();
       form.reset();
 
-      // Log activity
+      // Log activity, passing queryClient
       const className = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
-      await logActivity(user, 'ASSESSMENT_ADDED', `Menambahkan penilaian baru: ${values.nama_penilaian} untuk kelas ${className}`);
+      await logActivity(user, 'ASSESSMENT_ADDED', `Menambahkan penilaian baru: ${values.nama_penilaian} untuk kelas ${className}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] });
     }
   };

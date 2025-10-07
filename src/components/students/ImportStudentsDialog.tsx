@@ -19,7 +19,7 @@ import * as XLSX from 'xlsx';
 import { showError, showSuccess } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface ImportStudentsDialogProps {
@@ -36,6 +36,7 @@ interface ParsedStudent {
 
 const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onClose, onStudentsImported }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Get queryClient here
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedStudent[]>([]);
   const [isImporting, setIsImporting] = useState(false);
@@ -152,8 +153,8 @@ const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onC
         showSuccess(`Berhasil mengimpor ${data.insertedCount} siswa!`);
         onStudentsImported();
         handleClose();
-        // Log activity
-        await logActivity(user, 'STUDENTS_IMPORTED', `Mengimpor ${data.insertedCount} siswa dari file Excel.`);
+        // Log activity, passing queryClient
+        await logActivity(user, 'STUDENTS_IMPORTED', `Mengimpor ${data.insertedCount} siswa dari file Excel.`, queryClient);
       }
     } catch (error: any) {
       showError("Terjadi kesalahan saat mengimpor siswa: " + error.message);

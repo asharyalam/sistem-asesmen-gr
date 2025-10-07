@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import AddClassDialog from '@/components/classes/AddClassDialog';
 import EditClassDialog from '@/components/classes/EditClassDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -39,7 +39,7 @@ const Classes = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [classToDeleteId, setClassToDeleteId] = useState<string | null>(null);
   const [classToDeleteName, setClassToDeleteName] = useState<string | null>(null); // State to store class name for logging
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   const { data: classes, isLoading, isError, error } = useQuery<Kelas[], Error>({
     queryKey: ['classes', user?.id],
@@ -90,8 +90,8 @@ const Classes = () => {
       showError("Gagal menghapus kelas: " + error.message);
     } else {
       showSuccess("Kelas berhasil dihapus!");
-      // Log activity
-      await logActivity(user, 'CLASS_DELETED', `Menghapus kelas: ${classToDeleteName}`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'CLASS_DELETED', `Menghapus kelas: ${classToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] }); // Invalidate total classes
     }
@@ -180,7 +180,7 @@ const Classes = () => {
 
       <EditClassDialog
         isOpen={isEditClassDialogOpen}
-        onClose={() => setIsEditClassDialogOpen(false)}
+        onClose={() => setIsAddClassDialogOpen(false)}
         onClassUpdated={handleClassUpdated}
         classData={classToEdit}
       />

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Users, Edit, Trash2, FileUp } from 'lucide-react';
 import AddStudentDialog from '@/components/students/AddStudentDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -45,7 +45,7 @@ const Students = () => {
   const [studentToDeleteId, setStudentToDeleteId] = useState<string | null>(null);
   const [studentToDeleteName, setStudentToDeleteName] = useState<string | null>(null); // State to store student name for logging
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient(); // Get queryClient here
 
   const { data: students, isLoading, isError, error } = useQuery<Siswa[], Error>({
     queryKey: ['students', user?.id],
@@ -107,8 +107,8 @@ const Students = () => {
       showError("Gagal menghapus siswa: " + error.message);
     } else {
       showSuccess("Siswa berhasil dihapus!");
-      // Log activity
-      await logActivity(user, 'STUDENT_DELETED', `Menghapus siswa: ${studentToDeleteName}`);
+      // Log activity, passing queryClient
+      await logActivity(user, 'STUDENT_DELETED', `Menghapus siswa: ${studentToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] });
     }
