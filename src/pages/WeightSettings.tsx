@@ -237,14 +237,18 @@ const WeightSettings = () => {
 
   const isLoading = isLoadingClasses || isLoadingCategories || isLoadingWeightSettings;
 
-  const totalCurrentWeight = categories?.reduce((sum, category) => {
-    if (activeCategoryIds.includes(category.id)) {
-      const fieldName = `bobot_${category.id}`;
-      const value = allFormValues[fieldName]; // Access from allFormValues
-      return sum + (typeof value === 'number' ? value : 0);
-    }
-    return sum;
-  }, 0);
+  const totalCurrentWeight = useMemo(() => {
+    return categories?.reduce((sum, category) => {
+      if (activeCategoryIds.includes(category.id)) {
+        const fieldName = `bobot_${category.id}`;
+        const value = allFormValues[fieldName];
+        // Explicitly parse the value to a number, default to 0 if it's not a valid number
+        const numericValue = parseFloat(value as string) || 0;
+        return sum + numericValue;
+      }
+      return sum;
+    }, 0) || 0;
+  }, [allFormValues, activeCategoryIds, categories]);
 
   return (
     <div className="flex-1 space-y-8 p-4">
