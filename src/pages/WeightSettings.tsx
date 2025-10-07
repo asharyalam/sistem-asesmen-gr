@@ -178,19 +178,23 @@ const WeightSettings = () => {
       return;
     }
 
-    const upsertData: PengaturanBobotKelas[] = [];
+    const upsertData: Partial<PengaturanBobotKelas>[] = []; // Use Partial to allow 'id' to be optional
     const categoriesToKeepIds = new Set<string>();
 
     // Prepare data for upsert (active categories)
     activeCategoryIds.forEach(categoryId => {
       const bobotValue = values[`bobot_${categoryId}`];
       if (typeof bobotValue === 'number' && bobotValue >= 0 && bobotValue <= 100) {
-        upsertData.push({
-          id: weightSettings?.find(ws => ws.id_kategori_bobot === categoryId)?.id || '', // Include existing ID for update
+        const existingSetting = weightSettings?.find(ws => ws.id_kategori_bobot === categoryId);
+        const recordToUpsert: Partial<PengaturanBobotKelas> = {
           id_kelas: selectedClassId,
           id_kategori_bobot: categoryId,
           bobot_persentase: bobotValue,
-        });
+        };
+        if (existingSetting) {
+          recordToUpsert.id = existingSetting.id; // Include ID only for existing records (updates)
+        }
+        upsertData.push(recordToUpsert);
         categoriesToKeepIds.add(categoryId);
       }
     });
