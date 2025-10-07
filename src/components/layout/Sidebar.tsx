@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Book, ClipboardList, Settings, LogOut, BarChart3, TrendingUp } from "lucide-react"; // Import TrendingUp icon
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react"; // Menghapus Users dan BarChart3
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,28 +25,13 @@ const Sidebar = () => {
       path: "/classes",
     },
     {
-      name: "Manajemen Siswa",
-      icon: Users,
-      path: "/students",
-    },
-    {
       name: "Manajemen Penilaian",
       icon: ClipboardList,
       path: "/assessments",
     },
     {
-      name: "Manajemen Kehadiran",
-      icon: BarChart3,
-      path: "/attendance",
-    },
-    {
-      name: "Pengaturan Bobot",
-      icon: Settings,
-      path: "/weight-settings",
-    },
-    {
-      name: "Analisis Statistik", // New navigation item
-      icon: TrendingUp, // New icon
+      name: "Analisis Statistik",
+      icon: TrendingUp,
       path: "/statistical-analysis",
     },
   ];

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks } from 'lucide-react';
+import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks, Settings } from 'lucide-react'; // Menambahkan Settings
 import AddAssessmentDialog from '@/components/assessments/AddAssessmentDialog';
 import EditAssessmentDialog from '@/components/assessments/EditAssessmentDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
@@ -139,6 +139,12 @@ const Assessments = () => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Daftar Penilaian</CardTitle>
           <div className="flex space-x-2">
+            <Button
+              onClick={() => navigate('/weight-settings')}
+              className="rounded-lg bg-weightSettingsAccent-DEFAULT text-primary-foreground hover:bg-weightSettingsAccent-DEFAULT/90 shadow-mac-sm"
+            >
+              <Settings className="mr-2 h-4 w-4" /> Pengaturan Bobot
+            </Button>
             <Button
               onClick={() => navigate('/assessments/input-score')}
               className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"

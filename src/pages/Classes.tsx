@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Edit } from 'lucide-react';
+import { PlusCircle, Trash2, Edit, Users, BarChart3 } from 'lucide-react'; // Menambahkan Users dan BarChart3
 import AddClassDialog from '@/components/classes/AddClassDialog';
 import EditClassDialog from '@/components/classes/EditClassDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Kelas {
@@ -33,6 +34,7 @@ interface Kelas {
 
 const Classes = () => {
   const { user } = useSession();
+  const navigate = useNavigate(); // Inisialisasi useNavigate
   const [isAddClassDialogOpen, setIsAddClassDialogOpen] = useState(false);
   const [isEditClassDialogOpen, setIsEditClassDialogOpen] = useState(false);
   const [classToEdit, setClassToEdit] = useState<Kelas | null>(null);
@@ -114,12 +116,26 @@ const Classes = () => {
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Daftar Kelas</CardTitle>
-          <Button
-            onClick={() => setIsAddClassDialogOpen(true)}
-            className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Kelas Baru
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => navigate('/students')}
+              className="rounded-lg bg-studentsAccent-DEFAULT text-primary-foreground hover:bg-studentsAccent-DEFAULT/90 shadow-mac-sm"
+            >
+              <Users className="mr-2 h-4 w-4" /> Kelola Siswa
+            </Button>
+            <Button
+              onClick={() => navigate('/attendance')}
+              className="rounded-lg bg-attendanceAccent-DEFAULT text-primary-foreground hover:bg-attendanceAccent-DEFAULT/90 shadow-mac-sm"
+            >
+              <BarChart3 className="mr-2 h-4 w-4" /> Kelola Kehadiran
+            </Button>
+            <Button
+              onClick={() => setIsAddClassDialogOpen(true)}
+              className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> Tambah Kelas Baru
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -180,7 +196,7 @@ const Classes = () => {
 
       <EditClassDialog
         isOpen={isEditClassDialogOpen}
-        onClose={() => setIsAddClassDialogOpen(false)}
+        onClose={() => setIsEditClassDialogOpen(false)}
         onClassUpdated={handleClassUpdated}
         classData={classToEdit}
       />
