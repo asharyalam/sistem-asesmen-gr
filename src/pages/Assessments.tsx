@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks, Settings } from 'lucide-react'; // Menambahkan Settings
+import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks, Settings } from 'lucide-react';
 import AddAssessmentDialog from '@/components/assessments/AddAssessmentDialog';
 import EditAssessmentDialog from '@/components/assessments/EditAssessmentDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { logActivity } from '@/utils/activityLogger';
 
 interface Penilaian {
   id: string;
@@ -51,8 +51,8 @@ const Assessments = () => {
   const [assessmentToEdit, setAssessmentToEdit] = useState<Penilaian | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assessmentToDeleteId, setAssessmentToDeleteId] = useState<string | null>(null);
-  const [assessmentToDeleteName, setAssessmentToDeleteName] = useState<string | null>(null); // State to store assessment name for logging
-  const queryClient = useQueryClient(); // Get queryClient here
+  const [assessmentToDeleteName, setAssessmentToDeleteName] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: assessments, isLoading, isError, error } = useQuery<Penilaian[], Error>({
     queryKey: ['assessments', user?.id],
@@ -99,7 +99,7 @@ const Assessments = () => {
 
   const handleDeleteClick = (assessmentId: string, assessmentName: string) => {
     setAssessmentToDeleteId(assessmentId);
-    setAssessmentToDeleteName(assessmentName); // Store assessment name
+    setAssessmentToDeleteName(assessmentName);
     setIsDeleteDialogOpen(true);
   };
 
@@ -114,7 +114,6 @@ const Assessments = () => {
     if (error) {
       showError("Gagal menghapus penilaian: " + error.message);
     } else {
-      // Log activity, passing queryClient
       await logActivity(user, 'ASSESSMENT_DELETED', `Menghapus penilaian: ${assessmentToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['assessments', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] });
@@ -141,7 +140,7 @@ const Assessments = () => {
           <div className="flex space-x-2">
             <Button
               onClick={() => navigate('/weight-settings')}
-              className="rounded-lg bg-weightSettingsAccent-DEFAULT text-weightSettingsAccent-foreground hover:bg-weightSettingsAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-primary text-white hover:bg-primary/90 shadow-mac-sm"
             >
               <Settings className="mr-2 h-4 w-4" /> Pengaturan Bobot
             </Button>
@@ -203,7 +202,7 @@ const Assessments = () => {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(assessment.id, assessment.nama_penilaian)} // Pass assessment name
+                        onClick={() => handleDeleteClick(assessment.id, assessment.nama_penilaian)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>

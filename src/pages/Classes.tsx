@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Edit, Users, BarChart3 } from 'lucide-react'; // Menambahkan Users dan BarChart3
+import { PlusCircle, Trash2, Edit, Users, BarChart3 } from 'lucide-react';
 import AddClassDialog from '@/components/classes/AddClassDialog';
 import EditClassDialog from '@/components/classes/EditClassDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -22,8 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { useNavigate } from 'react-router-dom';
+import { logActivity } from '@/utils/activityLogger';
 
 interface Kelas {
   id: string;
@@ -34,14 +34,14 @@ interface Kelas {
 
 const Classes = () => {
   const { user } = useSession();
-  const navigate = useNavigate(); // Inisialisasi useNavigate
+  const navigate = useNavigate();
   const [isAddClassDialogOpen, setIsAddClassDialogOpen] = useState(false);
   const [isEditClassDialogOpen, setIsEditClassDialogOpen] = useState(false);
   const [classToEdit, setClassToEdit] = useState<Kelas | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [classToDeleteId, setClassToDeleteId] = useState<string | null>(null);
-  const [classToDeleteName, setClassToDeleteName] = useState<string | null>(null); // State to store class name for logging
-  const queryClient = useQueryClient(); // Get queryClient here
+  const [classToDeleteName, setClassToDeleteName] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: classes, isLoading, isError, error } = useQuery<Kelas[], Error>({
     queryKey: ['classes', user?.id],
@@ -76,7 +76,7 @@ const Classes = () => {
 
   const handleDeleteClick = (classId: string, className: string) => {
     setClassToDeleteId(classId);
-    setClassToDeleteName(className); // Store class name
+    setClassToDeleteName(className);
     setIsDeleteDialogOpen(true);
   };
 
@@ -92,10 +92,9 @@ const Classes = () => {
       showError("Gagal menghapus kelas: " + error.message);
     } else {
       showSuccess("Kelas berhasil dihapus!");
-      // Log activity, passing queryClient
       await logActivity(user, 'CLASS_DELETED', `Menghapus kelas: ${classToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] }); // Invalidate total classes
+      queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] });
     }
     setIsDeleteDialogOpen(false);
     setClassToDeleteId(null);
@@ -119,13 +118,13 @@ const Classes = () => {
           <div className="flex space-x-2">
             <Button
               onClick={() => navigate('/students')}
-              className="rounded-lg bg-studentsAccent-DEFAULT text-studentsAccent-foreground hover:bg-studentsAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-primary text-white hover:bg-primary/90 shadow-mac-sm"
             >
               <Users className="mr-2 h-4 w-4" /> Kelola Siswa
             </Button>
             <Button
               onClick={() => navigate('/attendance')}
-              className="rounded-lg bg-attendanceAccent-DEFAULT text-attendanceAccent-foreground hover:bg-attendanceAccent-DEFAULT/90 shadow-mac-sm"
+              className="rounded-lg bg-primary text-white hover:bg-primary/90 shadow-mac-sm"
             >
               <BarChart3 className="mr-2 h-4 w-4" /> Kelola Kehadiran
             </Button>
@@ -173,7 +172,7 @@ const Classes = () => {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(kelas.id, kelas.nama_kelas)} // Pass class name
+                        onClick={() => handleDeleteClick(kelas.id, kelas.nama_kelas)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>
