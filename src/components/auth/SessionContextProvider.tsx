@@ -5,6 +5,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { showLoading, dismissToast, showError } from '@/utils/toast';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface SessionContextType {
   session: Session | null;
@@ -30,7 +31,13 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
         setLoading(false);
         if (toastId) dismissToast(toastId);
         navigate('/'); // Redirect to dashboard after login
+        if (currentSession?.user) {
+          await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`);
+        }
       } else if (event === 'SIGNED_OUT') {
+        if (user) { // Log logout for the user who was signed in
+          await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`);
+        }
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -78,7 +85,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       subscription.unsubscribe();
       if (toastId) dismissToast(toastId);
     };
-  }, [navigate]);
+  }, [navigate, user]); // Added user to dependency array to ensure logout log works correctly
 
   return (
     <SessionContext.Provider value={{ session, user, loading }}>

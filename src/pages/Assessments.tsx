@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Penilaian {
   id: string;
@@ -50,6 +51,7 @@ const Assessments = () => {
   const [assessmentToEdit, setAssessmentToEdit] = useState<Penilaian | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assessmentToDeleteId, setAssessmentToDeleteId] = useState<string | null>(null);
+  const [assessmentToDeleteName, setAssessmentToDeleteName] = useState<string | null>(null); // State to store assessment name for logging
   const queryClient = useQueryClient();
 
   const { data: assessments, isLoading, isError, error } = useQuery<Penilaian[], Error>({
@@ -95,13 +97,14 @@ const Assessments = () => {
     queryClient.invalidateQueries({ queryKey: ['assessments', user?.id] });
   };
 
-  const handleDeleteClick = (assessmentId: string) => {
+  const handleDeleteClick = (assessmentId: string, assessmentName: string) => {
     setAssessmentToDeleteId(assessmentId);
+    setAssessmentToDeleteName(assessmentName); // Store assessment name
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteAssessment = async () => {
-    if (!assessmentToDeleteId) return;
+    if (!assessmentToDeleteId || !user) return;
 
     const { error } = await supabase
       .from('penilaian')
@@ -111,10 +114,14 @@ const Assessments = () => {
     if (error) {
       showError("Gagal menghapus penilaian: " + error.message);
     } else {
+      // Log activity
+      await logActivity(user, 'ASSESSMENT_DELETED', `Menghapus penilaian: ${assessmentToDeleteName}`);
       queryClient.invalidateQueries({ queryKey: ['assessments', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] });
     }
     setIsDeleteDialogOpen(false);
     setAssessmentToDeleteId(null);
+    setAssessmentToDeleteName(null);
   };
 
   if (isError) {
@@ -163,7 +170,7 @@ const Assessments = () => {
                   <TableHead>Jenis</TableHead>
                   <TableHead>Bentuk</TableHead>
                   <TableHead>Kode TP</TableHead>
-                  <TableHead>Kategori Bobot</TableHead> {/* New column */}
+                  <TableHead>Kategori Bobot</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -176,7 +183,7 @@ const Assessments = () => {
                     <TableCell>{assessment.jenis_penilaian}</TableCell>
                     <TableCell>{assessment.bentuk_penilaian}</TableCell>
                     <TableCell>{assessment.kode_tp || '-'}</TableCell>
-                    <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell> {/* Display category name */}
+                    <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
@@ -190,7 +197,7 @@ const Assessments = () => {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(assessment.id)}
+                        onClick={() => handleDeleteClick(assessment.id, assessment.nama_penilaian)} // Pass assessment name
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>

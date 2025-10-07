@@ -18,6 +18,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Kelas {
   id: string;
@@ -132,8 +133,8 @@ const AttendanceInput = () => {
   };
 
   const handleSaveAttendance = async () => {
-    if (!selectedClassId || !selectedDate || !students || students.length === 0) {
-      showError("Pilih kelas dan tanggal, serta pastikan ada siswa.");
+    if (!selectedClassId || !selectedDate || !students || students.length === 0 || !user) {
+      showError("Pilih kelas dan tanggal, serta pastikan ada siswa dan Anda sudah login.");
       return;
     }
 
@@ -156,6 +157,9 @@ const AttendanceInput = () => {
 
       showSuccess("Kehadiran berhasil disimpan!");
       queryClient.invalidateQueries({ queryKey: ['existingAttendance', selectedClassId, selectedDate] });
+      // Log activity
+      const className = classes?.find(c => c.id === selectedClassId)?.nama_kelas || 'Unknown Class';
+      await logActivity(user, 'ATTENDANCE_SAVED', `Menyimpan catatan kehadiran untuk kelas ${className} pada tanggal ${formattedDate}`);
     } catch (error: any) {
       showError("Gagal menyimpan kehadiran: " + error.message);
     } finally {

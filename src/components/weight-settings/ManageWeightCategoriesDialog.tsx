@@ -38,6 +38,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface KategoriBobot {
   id: string;
@@ -54,11 +56,13 @@ interface ManageWeightCategoriesDialogProps {
 }
 
 const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> = ({ isOpen, onClose }) => {
+  const { user } = useSession(); // Get user from session
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [editingCategory, setEditingCategory] = useState<KategoriBobot | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [categoryToDeleteId, setCategoryToDeleteId] = useState<string | null>(null);
+  const [categoryToDeleteName, setCategoryToDeleteName] = useState<string | null>(null); // State to store category name for logging
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,6 +96,11 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
   }, [editingCategory, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      showError("Anda harus login untuk mengelola kategori bobot.");
+      return;
+    }
+
     if (editingCategory) {
       // Update existing category
       const { error } = await supabase
@@ -106,6 +115,8 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
         queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
         setEditingCategory(null);
         form.reset();
+        // Log activity
+        await logActivity(user, 'WEIGHT_CATEGORY_UPDATED', `Memperbarui kategori bobot: ${editingCategory.nama_kategori} menjadi ${values.nama_kategori}`);
       }
     } else {
       // Add new category
@@ -120,12 +131,14 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
         queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
         form.reset();
         setIsAdding(false);
+        // Log activity
+        await logActivity(user, 'WEIGHT_CATEGORY_ADDED', `Menambahkan kategori bobot baru: ${values.nama_kategori}`);
       }
     }
   };
 
   const handleDeleteCategory = async () => {
-    if (!categoryToDeleteId) return;
+    if (!categoryToDeleteId || !user) return;
 
     const { error } = await supabase
       .from('kategori_bobot')
@@ -136,10 +149,13 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
       showError("Gagal menghapus kategori: " + error.message);
     } else {
       showSuccess("Kategori berhasil dihapus!");
+      // Log activity
+      await logActivity(user, 'WEIGHT_CATEGORY_DELETED', `Menghapus kategori bobot: ${categoryToDeleteName}`);
       queryClient.invalidateQueries({ queryKey: ['weightCategories'] });
     }
     setIsDeleteDialogOpen(false);
     setCategoryToDeleteId(null);
+    setCategoryToDeleteName(null);
   };
 
   if (isError) {
@@ -227,7 +243,7 @@ const ManageWeightCategoriesDialog: React.FC<ManageWeightCategoriesDialogProps> 
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => { setCategoryToDeleteId(category.id); setIsDeleteDialogOpen(true); }}
+                        onClick={() => { setCategoryToDeleteId(category.id); setCategoryToDeleteName(category.nama_kategori); setIsDeleteDialogOpen(true); }}
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>

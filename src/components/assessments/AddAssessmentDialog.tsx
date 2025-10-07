@@ -38,7 +38,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface KategoriBobot {
   id: string;
@@ -52,7 +53,7 @@ const formSchema = z.object({
   jenis_penilaian: z.string().min(1, { message: "Jenis penilaian tidak boleh kosong." }),
   bentuk_penilaian: z.string().min(1, { message: "Bentuk penilaian tidak boleh kosong." }),
   kode_tp: z.string().optional(),
-  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }), // New field
+  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }),
 });
 
 interface AddAssessmentDialogProps {
@@ -63,7 +64,7 @@ interface AddAssessmentDialogProps {
 
 const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClose, onAssessmentAdded }) => {
   const { user } = useSession();
-  const queryClient = useQueryClient(); // Initialize useQueryClient
+  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,7 +74,7 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
       jenis_penilaian: "",
       bentuk_penilaian: "",
       kode_tp: "",
-      id_kategori_bobot_akhir: "", // Default for new field
+      id_kategori_bobot_akhir: "",
     },
   });
 
@@ -126,7 +127,7 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
         jenis_penilaian: values.jenis_penilaian,
         bentuk_penilaian: values.bentuk_penilaian,
         kode_tp: values.kode_tp || null,
-        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir, // Save selected category
+        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir,
       });
 
     if (error) {
@@ -139,13 +140,8 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
 
       // Log activity
       const className = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
-      await supabase.from('activity_log').insert({
-        user_id: user.id,
-        activity_type: 'ASSESSMENT_ADDED',
-        description: `Menambahkan penilaian baru: ${values.nama_penilaian} untuk kelas ${className}`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['recentActivities', user.id] }); // Invalidate recent activities
-      queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] }); // Invalidate total assessments
+      await logActivity(user, 'ASSESSMENT_ADDED', `Menambahkan penilaian baru: ${values.nama_penilaian} untuk kelas ${className}`);
+      queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] });
     }
   };
 

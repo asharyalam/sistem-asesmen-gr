@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Edit } from 'lucide-react'; // Menambahkan ikon Edit
+import { PlusCircle, Trash2, Edit } from 'lucide-react';
 import AddClassDialog from '@/components/classes/AddClassDialog';
-import EditClassDialog from '@/components/classes/EditClassDialog'; // Import komponen EditClassDialog
+import EditClassDialog from '@/components/classes/EditClassDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Kelas {
   id: string;
@@ -33,10 +34,11 @@ interface Kelas {
 const Classes = () => {
   const { user } = useSession();
   const [isAddClassDialogOpen, setIsAddClassDialogOpen] = useState(false);
-  const [isEditClassDialogOpen, setIsEditClassDialogOpen] = useState(false); // State untuk dialog edit
-  const [classToEdit, setClassToEdit] = useState<Kelas | null>(null); // State untuk data kelas yang akan diedit
+  const [isEditClassDialogOpen, setIsEditClassDialogOpen] = useState(false);
+  const [classToEdit, setClassToEdit] = useState<Kelas | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [classToDeleteId, setClassToDeleteId] = useState<string | null>(null);
+  const [classToDeleteName, setClassToDeleteName] = useState<string | null>(null); // State to store class name for logging
   const queryClient = useQueryClient();
 
   const { data: classes, isLoading, isError, error } = useQuery<Kelas[], Error>({
@@ -54,11 +56,11 @@ const Classes = () => {
       }
       return data || [];
     },
-    enabled: !!user, // Only run query if user is available
+    enabled: !!user,
   });
 
   const handleClassAdded = () => {
-    queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after adding a new one
+    queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
   };
 
   const handleEditClick = (kelas: Kelas) => {
@@ -67,16 +69,17 @@ const Classes = () => {
   };
 
   const handleClassUpdated = () => {
-    queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after updating
+    queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
   };
 
-  const handleDeleteClick = (classId: string) => {
+  const handleDeleteClick = (classId: string, className: string) => {
     setClassToDeleteId(classId);
+    setClassToDeleteName(className); // Store class name
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteClass = async () => {
-    if (!classToDeleteId) return;
+    if (!classToDeleteId || !user) return;
 
     const { error } = await supabase
       .from('kelas')
@@ -87,10 +90,14 @@ const Classes = () => {
       showError("Gagal menghapus kelas: " + error.message);
     } else {
       showSuccess("Kelas berhasil dihapus!");
-      queryClient.invalidateQueries({ queryKey: ['classes', user?.id] }); // Refetch classes after deletion
+      // Log activity
+      await logActivity(user, 'CLASS_DELETED', `Menghapus kelas: ${classToDeleteName}`);
+      queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] }); // Invalidate total classes
     }
     setIsDeleteDialogOpen(false);
     setClassToDeleteId(null);
+    setClassToDeleteName(null);
   };
 
   if (isError) {
@@ -150,7 +157,7 @@ const Classes = () => {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(kelas.id)}
+                        onClick={() => handleDeleteClick(kelas.id, kelas.nama_kelas)} // Pass class name
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>

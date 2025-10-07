@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Save, ChevronLeft, ListPlus, Edit } from 'lucide-react'; // Menambahkan ikon Edit
+import { PlusCircle, Save, ChevronLeft, ListPlus, Edit } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
@@ -15,8 +15,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import AddAspectDialog from '@/components/assessments/AddAspectDialog';
 import AddMultipleAspectsDialog from '@/components/assessments/AddMultipleAspectsDialog';
-import EditAspectDialog from '@/components/assessments/EditAspectDialog'; // Import dialog baru
+import EditAspectDialog from '@/components/assessments/EditAspectDialog';
 import { Badge } from '@/components/ui/badge';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Penilaian {
   id: string;
@@ -55,8 +56,8 @@ const ScoreInput = () => {
   const [scores, setScores] = useState<NilaiSiswa>({});
   const [isAddAspectDialogOpen, setIsAddAspectDialogOpen] = useState(false);
   const [isAddMultipleAspectsDialogOpen, setIsAddMultipleAspectsDialogOpen] = useState(false);
-  const [isEditAspectDialogOpen, setIsEditAspectDialogOpen] = useState(false); // State untuk dialog edit aspek
-  const [aspectToEdit, setAspectToEdit] = useState<AspekPenilaian | null>(null); // State untuk data aspek yang akan diedit
+  const [isEditAspectDialogOpen, setIsEditAspectDialogOpen] = useState(false);
+  const [aspectToEdit, setAspectToEdit] = useState<AspekPenilaian | null>(null);
 
   // Fetch all assessments for the current user
   const { data: assessments, isLoading: isLoadingAssessments, isError: isErrorAssessments, error: assessmentsError } = useQuery<Penilaian[], Error>({
@@ -176,8 +177,8 @@ const ScoreInput = () => {
   };
 
   const handleSaveScores = async () => {
-    if (!selectedAssessmentId || !students || !aspects) {
-      showError("Penilaian, siswa, atau aspek belum dimuat.");
+    if (!selectedAssessmentId || !students || !aspects || !user) {
+      showError("Penilaian, siswa, atau aspek belum dimuat, atau Anda belum login.");
       return;
     }
 
@@ -218,8 +219,6 @@ const ScoreInput = () => {
         if (insertError) throw insertError;
       }
       if (updates.length > 0) {
-        // Supabase bulk update is tricky. We'll do individual updates for simplicity.
-        // For large datasets, consider an Edge Function for bulk updates.
         for (const update of updates) {
           const { error: updateError } = await supabase
             .from('nilai_aspek_siswa')
@@ -231,7 +230,9 @@ const ScoreInput = () => {
       }
 
       showSuccess("Nilai berhasil disimpan!");
-      queryClient.invalidateQueries({ queryKey: ['existingScores', selectedAssessmentId] }); // Refresh scores
+      queryClient.invalidateQueries({ queryKey: ['existingScores', selectedAssessmentId] });
+      // Log activity
+      await logActivity(user, 'SCORE_SAVED', `Menyimpan nilai untuk penilaian: ${currentAssessment?.nama_penilaian} (${currentAssessment?.kelas?.nama_kelas})`);
     } catch (error: any) {
       showError("Gagal menyimpan nilai: " + error.message);
     }
@@ -243,7 +244,7 @@ const ScoreInput = () => {
   };
 
   const handleAspectUpdated = () => {
-    queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after updating
+    queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] });
   };
 
   if (isErrorAssessments) {
@@ -436,9 +437,9 @@ const ScoreInput = () => {
           isOpen={isAddAspectDialogOpen}
           onClose={() => {
             setIsAddAspectDialogOpen(false);
-            queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after adding
+            queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] });
           }}
-          onAspectAdded={() => {}} // No specific action needed here, query invalidation handles refresh
+          onAspectAdded={() => {}}
           assessmentId={selectedAssessmentId}
         />
       )}
@@ -448,7 +449,7 @@ const ScoreInput = () => {
           isOpen={isAddMultipleAspectsDialogOpen}
           onClose={() => setIsAddMultipleAspectsDialogOpen(false)}
           onAspectsAdded={() => {
-            queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] }); // Refresh aspects after adding multiple
+            queryClient.invalidateQueries({ queryKey: ['assessmentAspects', selectedAssessmentId] });
           }}
           assessmentId={selectedAssessmentId}
         />

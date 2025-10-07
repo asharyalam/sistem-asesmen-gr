@@ -20,6 +20,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { useQuery } from '@tanstack/react-query';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface ImportStudentsDialogProps {
   isOpen: boolean;
@@ -151,6 +152,8 @@ const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onC
         showSuccess(`Berhasil mengimpor ${data.insertedCount} siswa!`);
         onStudentsImported();
         handleClose();
+        // Log activity
+        await logActivity(user, 'STUDENTS_IMPORTED', `Mengimpor ${data.insertedCount} siswa dari file Excel.`);
       }
     } catch (error: any) {
       showError("Terjadi kesalahan saat mengimpor siswa: " + error.message);

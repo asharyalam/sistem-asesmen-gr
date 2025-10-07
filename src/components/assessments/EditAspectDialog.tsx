@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
   deskripsi: z.string().min(1, { message: "Deskripsi aspek tidak boleh kosong." }),
@@ -44,6 +46,7 @@ interface EditAspectDialogProps {
 }
 
 const EditAspectDialog: React.FC<EditAspectDialogProps> = ({ isOpen, onClose, onAspectUpdated, aspectData }) => {
+  const { user } = useSession(); // Get user from session
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,6 +71,10 @@ const EditAspectDialog: React.FC<EditAspectDialogProps> = ({ isOpen, onClose, on
       showError("ID aspek penilaian tidak ditemukan.");
       return;
     }
+    if (!user) {
+      showError("Anda harus login untuk memperbarui aspek penilaian.");
+      return;
+    }
 
     const { error } = await supabase
       .from('aspek_penilaian')
@@ -84,6 +91,8 @@ const EditAspectDialog: React.FC<EditAspectDialogProps> = ({ isOpen, onClose, on
       showSuccess("Aspek penilaian berhasil diperbarui!");
       onAspectUpdated();
       onClose();
+      // Log activity
+      await logActivity(user, 'ASPECT_UPDATED', `Memperbarui aspek penilaian: ${aspectData.deskripsi} menjadi ${values.deskripsi} (ID: ${aspectData.id})`);
     }
   };
 

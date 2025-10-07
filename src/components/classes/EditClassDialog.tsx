@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { useSession } from '@/components/auth/SessionContextProvider';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
   nama_kelas: z.string().min(1, { message: "Nama kelas tidak boleh kosong." }),
@@ -42,6 +44,7 @@ interface EditClassDialogProps {
 }
 
 const EditClassDialog: React.FC<EditClassDialogProps> = ({ isOpen, onClose, onClassUpdated, classData }) => {
+  const { user } = useSession(); // Get user from session
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,6 +82,8 @@ const EditClassDialog: React.FC<EditClassDialogProps> = ({ isOpen, onClose, onCl
       showSuccess("Kelas berhasil diperbarui!");
       onClassUpdated();
       onClose();
+      // Log activity
+      await logActivity(user, 'CLASS_UPDATED', `Memperbarui kelas: ${classData.nama_kelas} menjadi ${values.nama_kelas} (${values.tahun_semester})`);
     }
   };
 

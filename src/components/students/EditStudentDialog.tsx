@@ -33,6 +33,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery } from '@tanstack/react-query';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
   nama_siswa: z.string().min(1, { message: "Nama siswa tidak boleh kosong." }),
@@ -88,7 +89,7 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({ isOpen, onClose, 
       }
       return data || [];
     },
-    enabled: !!user && isOpen, // Only run query if user is available and dialog is open
+    enabled: !!user && isOpen,
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -112,6 +113,10 @@ const EditStudentDialog: React.FC<EditStudentDialogProps> = ({ isOpen, onClose, 
       showSuccess("Siswa berhasil diperbarui!");
       onStudentUpdated();
       onClose();
+      // Log activity
+      const oldClassName = classes?.find(c => c.id === studentData.id_kelas)?.nama_kelas || 'Unknown Class';
+      const newClassName = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
+      await logActivity(user, 'STUDENT_UPDATED', `Memperbarui siswa: ${studentData.nama_siswa} (NIS/NISN: ${studentData.nis_nisn}) dari kelas ${oldClassName} ke kelas ${newClassName}`);
     }
   };
 

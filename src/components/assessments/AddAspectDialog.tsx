@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
   deskripsi: z.string().min(1, { message: "Deskripsi aspek tidak boleh kosong." }),
@@ -39,6 +41,7 @@ interface AddAspectDialogProps {
 }
 
 const AddAspectDialog: React.FC<AddAspectDialogProps> = ({ isOpen, onClose, onAspectAdded, assessmentId }) => {
+  const { user } = useSession(); // Get user from session
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,6 +52,11 @@ const AddAspectDialog: React.FC<AddAspectDialogProps> = ({ isOpen, onClose, onAs
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      showError("Anda harus login untuk menambahkan aspek penilaian.");
+      return;
+    }
+
     const { error } = await supabase
       .from('aspek_penilaian')
       .insert({
@@ -65,6 +73,8 @@ const AddAspectDialog: React.FC<AddAspectDialogProps> = ({ isOpen, onClose, onAs
       onAspectAdded();
       onClose();
       form.reset();
+      // Log activity
+      await logActivity(user, 'ASPECT_ADDED', `Menambahkan aspek penilaian: ${values.deskripsi} untuk penilaian ID: ${assessmentId}`);
     }
   };
 

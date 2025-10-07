@@ -39,6 +39,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery } from '@tanstack/react-query';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface KategoriBobot {
   id: string;
@@ -52,7 +53,7 @@ const formSchema = z.object({
   jenis_penilaian: z.string().min(1, { message: "Jenis penilaian tidak boleh kosong." }),
   bentuk_penilaian: z.string().min(1, { message: "Bentuk penilaian tidak boleh kosong." }),
   kode_tp: z.string().optional(),
-  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }), // New field
+  id_kategori_bobot_akhir: z.string().min(1, { message: "Kategori bobot harus dipilih." }),
 });
 
 interface EditAssessmentDialogProps {
@@ -67,7 +68,7 @@ interface EditAssessmentDialogProps {
     jenis_penilaian: string;
     bentuk_penilaian: string;
     kode_tp: string | null;
-    id_kategori_bobot_akhir: string | null; // Existing field, now used
+    id_kategori_bobot_akhir: string | null;
   } | null;
 }
 
@@ -82,7 +83,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
       jenis_penilaian: "",
       bentuk_penilaian: "",
       kode_tp: "",
-      id_kategori_bobot_akhir: "", // Default for new field
+      id_kategori_bobot_akhir: "",
     },
   });
 
@@ -95,7 +96,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
         jenis_penilaian: assessmentData.jenis_penilaian,
         bentuk_penilaian: assessmentData.bentuk_penilaian,
         kode_tp: assessmentData.kode_tp || "",
-        id_kategori_bobot_akhir: assessmentData.id_kategori_bobot_akhir || "", // Set existing category
+        id_kategori_bobot_akhir: assessmentData.id_kategori_bobot_akhir || "",
       });
     }
   }, [assessmentData, form]);
@@ -149,7 +150,7 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
         jenis_penilaian: values.jenis_penilaian,
         bentuk_penilaian: values.bentuk_penilaian,
         kode_tp: values.kode_tp || null,
-        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir, // Save selected category
+        id_kategori_bobot_akhir: values.id_kategori_bobot_akhir,
       })
       .eq('id', assessmentData.id);
 
@@ -159,6 +160,10 @@ const EditAssessmentDialog: React.FC<EditAssessmentDialogProps> = ({ isOpen, onC
       showSuccess("Penilaian berhasil diperbarui!");
       onAssessmentUpdated();
       onClose();
+      // Log activity
+      const oldClassName = classes?.find(c => c.id === assessmentData.id_kelas)?.nama_kelas || 'Unknown Class';
+      const newClassName = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
+      await logActivity(user, 'ASSESSMENT_UPDATED', `Memperbarui penilaian: ${assessmentData.nama_penilaian} (Kelas: ${oldClassName}) menjadi ${values.nama_penilaian} (Kelas: ${newClassName})`);
     }
   };
 

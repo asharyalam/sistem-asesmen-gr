@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, Edit, Trash2, FileUp } from 'lucide-react'; // Menambahkan ikon FileUp
+import { PlusCircle, Users, Edit, Trash2, FileUp } from 'lucide-react';
 import AddStudentDialog from '@/components/students/AddStudentDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +22,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import EditStudentDialog from '@/components/students/EditStudentDialog';
-import ImportStudentsDialog from '@/components/students/ImportStudentsDialog'; // Import komponen ImportStudentsDialog
+import ImportStudentsDialog from '@/components/students/ImportStudentsDialog';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Siswa {
   id: string;
@@ -42,7 +43,8 @@ const Students = () => {
   const [studentToEdit, setStudentToEdit] = useState<Siswa | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [studentToDeleteId, setStudentToDeleteId] = useState<string | null>(null);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false); // State untuk dialog impor
+  const [studentToDeleteName, setStudentToDeleteName] = useState<string | null>(null); // State to store student name for logging
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: students, isLoading, isError, error } = useQuery<Siswa[], Error>({
@@ -59,7 +61,7 @@ const Students = () => {
           id_kelas,
           kelas (nama_kelas)
         `)
-        .eq('kelas.id_guru', user.id) // Filter siswa berdasarkan kelas yang diajar guru
+        .eq('kelas.id_guru', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -67,15 +69,15 @@ const Students = () => {
       }
       return data || [];
     },
-    enabled: !!user, // Only run query if user is available
+    enabled: !!user,
   });
 
   const handleStudentAdded = () => {
-    queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after adding a new one
+    queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
   };
 
   const handleStudentImported = () => {
-    queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after importing
+    queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
   };
 
   const handleEditClick = (student: Siswa) => {
@@ -84,16 +86,17 @@ const Students = () => {
   };
 
   const handleStudentUpdated = () => {
-    queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after updating
+    queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
   };
 
-  const handleDeleteClick = (studentId: string) => {
+  const handleDeleteClick = (studentId: string, studentName: string) => {
     setStudentToDeleteId(studentId);
+    setStudentToDeleteName(studentName); // Store student name
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteStudent = async () => {
-    if (!studentToDeleteId) return;
+    if (!studentToDeleteId || !user) return;
 
     const { error } = await supabase
       .from('siswa')
@@ -104,10 +107,14 @@ const Students = () => {
       showError("Gagal menghapus siswa: " + error.message);
     } else {
       showSuccess("Siswa berhasil dihapus!");
-      queryClient.invalidateQueries({ queryKey: ['students', user?.id] }); // Refetch students after deletion
+      // Log activity
+      await logActivity(user, 'STUDENT_DELETED', `Menghapus siswa: ${studentToDeleteName}`);
+      queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] });
     }
     setIsDeleteDialogOpen(false);
     setStudentToDeleteId(null);
+    setStudentToDeleteName(null);
   };
 
   if (isError) {
@@ -177,7 +184,7 @@ const Students = () => {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(student.id)}
+                        onClick={() => handleDeleteClick(student.id, student.nama_siswa)} // Pass student name
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Hapus
                       </Button>

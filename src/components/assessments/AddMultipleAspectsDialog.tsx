@@ -25,6 +25,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const formSchema = z.object({
   numberOfAspects: z.coerce.number().min(1, { message: "Jumlah aspek minimal 1." }).max(20, { message: "Jumlah aspek maksimal 20." }),
@@ -39,6 +41,7 @@ interface AddMultipleAspectsDialogProps {
 }
 
 const AddMultipleAspectsDialog: React.FC<AddMultipleAspectsDialogProps> = ({ isOpen, onClose, onAspectsAdded, assessmentId }) => {
+  const { user } = useSession(); // Get user from session
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,6 +72,11 @@ const AddMultipleAspectsDialog: React.FC<AddMultipleAspectsDialogProps> = ({ isO
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      showError("Anda harus login untuk menambahkan aspek penilaian.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const aspectsToInsert = [];
@@ -94,6 +102,8 @@ const AddMultipleAspectsDialog: React.FC<AddMultipleAspectsDialogProps> = ({ isO
         onAspectsAdded();
         onClose();
         form.reset();
+        // Log activity
+        await logActivity(user, 'ASPECT_ADDED', `Menambahkan ${values.numberOfAspects} aspek penilaian baru untuk penilaian ID: ${assessmentId}`);
       }
     } catch (error: any) {
       showError("Terjadi kesalahan: " + error.message);

@@ -31,6 +31,7 @@ import { showError, showSuccess } from '@/utils/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import ManageWeightCategoriesDialog from '@/components/weight-settings/ManageWeightCategoriesDialog';
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 interface Kelas {
   id: string;
@@ -119,7 +120,7 @@ const WeightSettings = () => {
       id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
       ...schemaFields,
     });
-  }, [categories]); // Schema now depends only on `categories`
+  }, [categories]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -178,7 +179,7 @@ const WeightSettings = () => {
       return;
     }
 
-    const upsertData: Partial<PengaturanBobotKelas>[] = []; // Use Partial to allow 'id' to be optional
+    const upsertData: Partial<PengaturanBobotKelas>[] = [];
     const categoriesToKeepIds = new Set<string>();
 
     // Prepare data for upsert (active categories)
@@ -192,7 +193,7 @@ const WeightSettings = () => {
           bobot_persentase: bobotValue,
         };
         if (existingSetting) {
-          recordToUpsert.id = existingSetting.id; // Include ID only for existing records (updates)
+          recordToUpsert.id = existingSetting.id;
         }
         upsertData.push(recordToUpsert);
         categoriesToKeepIds.add(categoryId);
@@ -223,7 +224,10 @@ const WeightSettings = () => {
       }
 
       showSuccess("Pengaturan bobot berhasil disimpan!");
-      queryClient.invalidateQueries({ queryKey: ['weightSettings', selectedClassId] }); // Refetch to update UI
+      queryClient.invalidateQueries({ queryKey: ['weightSettings', selectedClassId] });
+      // Log activity
+      const className = classes?.find(c => c.id === selectedClassId)?.nama_kelas || 'Unknown Class';
+      await logActivity(user, 'WEIGHT_SETTINGS_SAVED', `Menyimpan pengaturan bobot untuk kelas ${className}`);
     } catch (error: any) {
       showError("Gagal menyimpan pengaturan bobot: " + error.message);
     }
@@ -248,7 +252,7 @@ const WeightSettings = () => {
     categories.forEach(category => {
       if (activeCategoryIds.includes(category.id)) {
         const fieldName = `bobot_${category.id}`;
-        const value = allFormValues[fieldName]; // Use allFormValues directly
+        const value = allFormValues[fieldName];
         const numericValue = Number(value); 
         if (!isNaN(numericValue)) {
           sum += numericValue;
@@ -256,7 +260,7 @@ const WeightSettings = () => {
       }
     });
     return sum;
-  }, [activeCategoryIds, categories, allFormValues]); // Changed dependency to allFormValues
+  }, [activeCategoryIds, categories, allFormValues]);
 
   return (
     <div className="flex-1 space-y-8 p-4">

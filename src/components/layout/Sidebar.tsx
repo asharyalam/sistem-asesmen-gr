@@ -1,14 +1,17 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Book, ClipboardList, Settings, LogOut, BarChart3 } from "lucide-react"; // Menghapus ikon BarChart
+import { Home, Users, Book, ClipboardList, Settings, LogOut, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { logActivity } from '@/utils/activityLogger'; // Import logActivity
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useSession(); // Get user from session
 
   const navItems = [
     {
@@ -49,6 +52,7 @@ const Sidebar = () => {
       showError("Gagal logout: " + error.message);
     } else {
       showSuccess("Berhasil logout!");
+      // logActivity is now handled in SessionContextProvider's onAuthStateChange for 'SIGNED_OUT' event
     }
   };
 
