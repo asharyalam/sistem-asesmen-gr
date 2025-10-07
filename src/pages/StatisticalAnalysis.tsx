@@ -42,6 +42,7 @@ interface AspekPenilaian {
   deskripsi: string;
   skor_maksimal: number;
   urutan: number;
+  id_penilaian: string; // Added id_penilaian for relational analysis filter
 }
 
 interface NilaiAspekSiswa {
@@ -110,7 +111,7 @@ const StatisticalAnalysis = () => {
     return classes.filter(c => c.tahun_semester === selectedTahunSemester);
   }, [classes, selectedTahunSemester]);
 
-  // Fetch students for the selected class
+  // Fetch students for the selected class (for descriptive analysis)
   const { data: students, isLoading: isLoadingStudents, isError: isErrorStudents, error: studentsError } = useQuery<Siswa[], Error>({
     queryKey: ['studentsForAnalysis', selectedClassId],
     queryFn: async () => {
@@ -129,7 +130,7 @@ const StatisticalAnalysis = () => {
     enabled: !!selectedClassId,
   });
 
-  // Fetch all assessment scores and details for the selected class
+  // Fetch all assessment scores and details for the selected class (for descriptive analysis)
   const { data: allScores, isLoading: isLoadingAllScores, isError: isErrorAllScores, error: allScoresError } = useQuery<NilaiAspekSiswa[], Error>({
     queryKey: ['allScoresForAnalysis', selectedClassId],
     queryFn: async () => {
@@ -140,7 +141,7 @@ const StatisticalAnalysis = () => {
           id_siswa,
           id_aspek,
           skor_diperoleh,
-          aspek_penilaian (deskripsi, skor_maksimal, urutan),
+          aspek_penilaian (deskripsi, skor_maksimal, urutan, id_penilaian),
           penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
         `)
         .eq('penilaian.id_kelas', selectedClassId)
@@ -154,7 +155,7 @@ const StatisticalAnalysis = () => {
     enabled: !!selectedClassId,
   });
 
-  // Fetch attendance records for the selected class
+  // Fetch attendance records for the selected class (for descriptive analysis)
   const { data: attendanceRecords, isLoading: isLoadingAttendance, isError: isErrorAttendance, error: attendanceError } = useQuery<KehadiranRecord[], Error>({
     queryKey: ['attendanceRecordsForAnalysis', selectedClassId],
     queryFn: async () => {
@@ -174,6 +175,76 @@ const StatisticalAnalysis = () => {
     enabled: !!selectedClassId && !!students && students.length > 0,
   });
 
+  // --- Comparative Analysis Queries ---
+  const { data: studentsClass1, isLoading: isLoadingStudentsClass1 } = useQuery<Siswa[], Error>({
+    queryKey: ['studentsComparison1', selectedComparisonClassId1],
+    queryFn: async () => {
+      if (!selectedComparisonClassId1) return [];
+      const { data, error } = await supabase
+        .from('siswa')
+        .select('id, nama_siswa, nis_nisn')
+        .eq('id_kelas', selectedComparisonClassId1)
+        .order('nama_siswa', { ascending: true });
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
+  });
+
+  const { data: studentsClass2, isLoading: isLoadingStudentsClass2 } = useQuery<Siswa[], Error>({
+    queryKey: ['studentsComparison2', selectedComparisonClassId2],
+    queryFn: async () => {
+      if (!selectedComparisonClassId2) return [];
+      const { data, error } = await supabase
+        .from('siswa')
+        .select('id, nama_siswa, nis_nisn')
+        .eq('id_kelas', selectedComparisonClassId2)
+        .order('nama_siswa', { ascending: true });
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
+  });
+
+  const { data: comparisonScores1, isLoading: isLoadingComparisonScores1 } = useQuery<NilaiAspekSiswa[], Error>({
+    queryKey: ['comparisonScores1', selectedComparisonClassId1],
+    queryFn: async () => {
+      if (!selectedComparisonClassId1) return [];
+      const { data, error } = await supabase
+        .from('nilai_aspek_siswa')
+        .select(`
+          id_siswa,
+          skor_diperoleh,
+          aspek_penilaian (skor_maksimal, id_penilaian),
+          penilaian (id)
+        `)
+        .eq('penilaian.id_kelas', selectedComparisonClassId1);
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
+  });
+
+  const { data: comparisonScores2, isLoading: isLoadingComparisonScores2 } = useQuery<NilaiAspekSiswa[], Error>({
+    queryKey: ['comparisonScores2', selectedComparisonClassId2],
+    queryFn: async () => {
+      if (!selectedComparisonClassId2) return [];
+      const { data, error } = await supabase
+        .from('nilai_aspek_siswa')
+        .select(`
+          id_siswa,
+          skor_diperoleh,
+          aspek_penilaian (skor_maksimal, id_penilaian),
+          penilaian (id)
+        `)
+        .eq('penilaian.id_kelas', selectedComparisonClassId2);
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
+  });
+
+  // --- Relational Analysis Queries ---
   // Fetch assessments for relational analysis (all assessments for the user's classes)
   const { data: allAssessments, isLoading: isLoadingAllAssessments } = useQuery<Penilaian[], Error>({
     queryKey: ['allAssessmentsForRelation', user?.id],
@@ -205,7 +276,7 @@ const StatisticalAnalysis = () => {
       if (!selectedRelationAssessmentId) return [];
       const { data, error } = await supabase
         .from('aspek_penilaian')
-        .select('id, deskripsi, skor_maksimal')
+        .select('id, deskripsi, skor_maksimal, id_penilaian') // Ensure id_penilaian is selected
         .eq('id_penilaian', selectedRelationAssessmentId)
         .order('urutan', { ascending: true });
 
@@ -229,10 +300,10 @@ const StatisticalAnalysis = () => {
           id_siswa,
           id_aspek,
           skor_diperoleh,
-          aspek_penilaian (deskripsi, skor_maksimal)
+          aspek_penilaian (deskripsi, skor_maksimal, id_penilaian)
         `)
         .in('id_aspek', [selectedRelationAspectId1, selectedRelationAspectId2])
-        .eq('penilaian.id', selectedRelationAssessmentId); // Ensure scores are from the selected assessment
+        .eq('aspek_penilaian.id_penilaian', selectedRelationAssessmentId); // Corrected filter condition
 
       if (error) {
         throw new Error(error.message);
@@ -244,62 +315,70 @@ const StatisticalAnalysis = () => {
 
   // --- Data Processing ---
 
+  // Helper function to calculate class average
+  const calculateClassAverage = (scores: NilaiAspekSiswa[], studentsInClass: Siswa[]) => {
+    if (!scores || scores.length === 0 || !studentsInClass || studentsInClass.length === 0) return 0;
+
+    const studentOverallPercentages: { [studentId: string]: number[] } = {};
+
+    // Initialize for all students in class, even if they have no scores
+    studentsInClass.forEach(student => {
+      studentOverallPercentages[student.id] = [];
+    });
+
+    // Group scores by student and then by assessment
+    const scoresGroupedByStudentAndAssessment = scores.reduce((acc, score) => {
+      if (!acc[score.id_siswa]) {
+        acc[score.id_siswa] = {};
+      }
+      if (!acc[score.id_siswa][score.penilaian.id]) {
+        acc[score.id_siswa][score.penilaian.id] = { studentScore: 0, maxScore: 0 };
+      }
+      acc[score.id_siswa][score.penilaian.id].studentScore += score.skor_diperoleh;
+      acc[score.id_siswa][score.penilaian.id].maxScore += score.aspek_penilaian.skor_maksimal;
+      return acc;
+    }, {} as { [studentId: string]: { [assessmentId: string]: { studentScore: number; maxScore: number } } });
+
+    for (const studentId in scoresGroupedByStudentAndAssessment) {
+      for (const assessmentId in scoresGroupedByStudentAndAssessment[studentId]) {
+        const data = scoresGroupedByStudentAndAssessment[studentId][assessmentId];
+        if (data.maxScore > 0) {
+          studentOverallPercentages[studentId].push((data.studentScore / data.maxScore) * 100);
+        }
+      }
+    }
+
+    let totalClassAverage = 0;
+    let studentsWithScoresCount = 0;
+
+    for (const studentId in studentOverallPercentages) {
+      const percentages = studentOverallPercentages[studentId];
+      if (percentages.length > 0) {
+        const studentAverage = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
+        totalClassAverage += studentAverage;
+        studentsWithScoresCount++;
+      }
+    }
+
+    return studentsWithScoresCount > 0 ? totalClassAverage / studentsWithScoresCount : 0;
+  };
+
+
   // 1. Overall Class Performance (Descriptive)
   const classPerformanceSummary = useMemo(() => {
     if (!allScores || allScores.length === 0 || !students || students.length === 0) return null;
 
-    const studentTotalScores: { [studentId: string]: { total: number; count: number } } = {};
-    const assessmentMaxScores: { [assessmentId: string]: number } = {};
-
-    allScores.forEach(score => {
-      const assessmentId = score.penilaian.id;
-      const aspectMaxScore = score.aspek_penilaian.skor_maksimal;
-
-      if (!assessmentMaxScores[assessmentId]) {
-        assessmentMaxScores[assessmentId] = 0;
-      }
-      assessmentMaxScores[assessmentId] += aspectMaxScore; // Sum max scores for all aspects in an assessment
-
-      if (!studentTotalScores[score.id_siswa]) {
-        studentTotalScores[score.id_siswa] = { total: 0, count: 0 };
-      }
-      studentTotalScores[score.id_siswa].total += score.skor_diperoleh;
-      studentTotalScores[score.id_siswa].count++;
-    });
+    const totalAverage = calculateClassAverage(allScores, students);
 
     const studentAverages: { studentId: string; average: number; nama_siswa: string }[] = [];
     students.forEach(student => {
-      if (studentTotalScores[student.id] && studentTotalScores[student.id].count > 0) {
-        // Calculate average as a percentage of max possible score for each assessment, then average those percentages
-        let totalPercentage = 0;
-        let assessmentCount = 0;
-        const scoresByAssessmentForStudent = allScores.filter(s => s.id_siswa === student.id);
-        const groupedByAssessment = scoresByAssessmentForStudent.reduce((acc, score) => {
-          if (!acc[score.penilaian.id]) {
-            acc[score.penilaian.id] = { studentScore: 0, maxScore: 0 };
-          }
-          acc[score.penilaian.id].studentScore += score.skor_diperoleh;
-          acc[score.penilaian.id].maxScore += score.aspek_penilaian.skor_maksimal;
-          return acc;
-        }, {} as { [key: string]: { studentScore: number; maxScore: number } });
-
-        Object.values(groupedByAssessment).forEach(data => {
-          if (data.maxScore > 0) {
-            totalPercentage += (data.studentScore / data.maxScore) * 100;
-            assessmentCount++;
-          }
-        });
-
-        const average = assessmentCount > 0 ? totalPercentage / assessmentCount : 0;
-        studentAverages.push({ studentId: student.id, average, nama_siswa: student.nama_siswa });
-      } else {
-        studentAverages.push({ studentId: student.id, average: 0, nama_siswa: student.nama_siswa }); // Students with no scores
-      }
+      const studentScores = allScores.filter(s => s.id_siswa === student.id);
+      const studentAvg = calculateClassAverage(studentScores, [student]); // Calculate average for a single student
+      studentAverages.push({ studentId: student.id, average: studentAvg, nama_siswa: student.nama_siswa });
     });
 
     if (studentAverages.length === 0) return null;
 
-    const totalAverage = studentAverages.reduce((sum, s) => sum + s.average, 0) / studentAverages.length;
     const maxScore = Math.max(...studentAverages.map(s => s.average));
     const minScore = Math.min(...studentAverages.map(s => s.average));
 
@@ -372,94 +451,11 @@ const StatisticalAnalysis = () => {
   }, [attendanceRecords]);
 
   // 4. Comparative Analysis Data
-  const { data: comparisonScores1, isLoading: isLoadingComparisonScores1 } = useQuery<NilaiAspekSiswa[], Error>({
-    queryKey: ['comparisonScores1', selectedComparisonClassId1],
-    queryFn: async () => {
-      if (!selectedComparisonClassId1) return [];
-      const { data, error } = await supabase
-        .from('nilai_aspek_siswa')
-        .select(`
-          id_siswa,
-          skor_diperoleh,
-          aspek_penilaian (skor_maksimal),
-          penilaian (id)
-        `)
-        .eq('penilaian.id_kelas', selectedComparisonClassId1);
-      if (error) throw new Error(error.message);
-      return data || [];
-    },
-    enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
-  });
-
-  const { data: comparisonScores2, isLoading: isLoadingComparisonScores2 } = useQuery<NilaiAspekSiswa[], Error>({
-    queryKey: ['comparisonScores2', selectedComparisonClassId2],
-    queryFn: async () => {
-      if (!selectedComparisonClassId2) return [];
-      const { data, error } = await supabase
-        .from('nilai_aspek_siswa')
-        .select(`
-          id_siswa,
-          skor_diperoleh,
-          aspek_penilaian (skor_maksimal),
-          penilaian (id)
-        `)
-        .eq('penilaian.id_kelas', selectedComparisonClassId2);
-      if (error) throw new Error(error.message);
-      return data || [];
-    },
-    enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
-  });
-
   const comparativeAnalysisData = useMemo(() => {
-    if (!comparisonScores1 || !comparisonScores2 || !classes) return [];
+    if (!comparisonScores1 || !comparisonScores2 || !classes || !studentsClass1 || !studentsClass2) return [];
 
-    const calculateClassAverage = (scores: NilaiAspekSiswa[]) => {
-      if (scores.length === 0) return 0;
-
-      const studentAssessmentPercentages: { [studentId: string]: { totalPercentage: number; count: number } } = {};
-
-      scores.forEach(score => {
-        const studentId = score.id_siswa;
-        const assessmentId = score.penilaian.id;
-        const studentScore = score.skor_diperoleh;
-        const maxScore = score.aspek_penilaian.skor_maksimal;
-
-        if (!studentAssessmentPercentages[studentId]) {
-          studentAssessmentPercentages[studentId] = { totalPercentage: 0, count: 0 };
-        }
-
-        // Group by assessment to calculate percentage per assessment first
-        const studentScoresForAssessment = scores.filter(s => s.id_siswa === studentId && s.penilaian.id === assessmentId);
-        const totalStudentScoreForAssessment = studentScoresForAssessment.reduce((sum, s) => sum + s.skor_diperoleh, 0);
-        const totalMaxScoreForAssessment = studentScoresForAssessment.reduce((sum, s) => sum + s.aspek_penilaian.skor_maksimal, 0);
-
-        if (totalMaxScoreForAssessment > 0) {
-          const percentage = (totalStudentScoreForAssessment / totalMaxScoreForAssessment) * 100;
-          // Only add once per assessment for a student
-          if (!studentAssessmentPercentages[studentId][assessmentId]) {
-            studentAssessmentPercentages[studentId].totalPercentage += percentage;
-            studentAssessmentPercentages[studentId].count++;
-            (studentAssessmentPercentages[studentId] as any)[assessmentId] = true; // Mark as processed for this assessment
-          }
-        }
-      });
-
-      let overallTotalAverage = 0;
-      let overallStudentCount = 0;
-
-      for (const studentId in studentAssessmentPercentages) {
-        const { totalPercentage, count } = studentAssessmentPercentages[studentId];
-        if (count > 0) {
-          overallTotalAverage += totalPercentage / count;
-          overallStudentCount++;
-        }
-      }
-
-      return overallStudentCount > 0 ? overallTotalAverage / overallStudentCount : 0;
-    };
-
-    const avg1 = calculateClassAverage(comparisonScores1);
-    const avg2 = calculateClassAverage(comparisonScores2);
+    const avg1 = calculateClassAverage(comparisonScores1, studentsClass1);
+    const avg2 = calculateClassAverage(comparisonScores2, studentsClass2);
 
     const className1 = classes.find(c => c.id === selectedComparisonClassId1)?.nama_kelas || 'Kelas 1';
     const className2 = classes.find(c => c.id === selectedComparisonClassId2)?.nama_kelas || 'Kelas 2';
@@ -468,7 +464,7 @@ const StatisticalAnalysis = () => {
       { name: className1, averageScore: parseFloat(avg1.toFixed(2)) },
       { name: className2, averageScore: parseFloat(avg2.toFixed(2)) },
     ];
-  }, [comparisonScores1, comparisonScores2, selectedComparisonClassId1, selectedComparisonClassId2, classes]);
+  }, [comparisonScores1, comparisonScores2, selectedComparisonClassId1, selectedComparisonClassId2, classes, studentsClass1, studentsClass2]);
 
   // 5. Relational Analysis Data
   const relationalAnalysisData = useMemo(() => {
@@ -759,7 +755,7 @@ const StatisticalAnalysis = () => {
               </div>
 
               {(selectedComparisonClassId1 && selectedComparisonClassId2) ? (
-                isLoadingComparisonScores1 || isLoadingComparisonScores2 ? (
+                isLoadingComparisonScores1 || isLoadingComparisonScores2 || isLoadingStudentsClass1 || isLoadingStudentsClass2 ? (
                   <Skeleton className="h-64 w-full rounded-lg" />
                 ) : comparativeAnalysisData.length > 0 ? (
                   <>
