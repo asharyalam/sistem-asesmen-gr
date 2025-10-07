@@ -244,8 +244,7 @@ const WeightSettings = () => {
     categories.forEach(category => {
       if (activeCategoryIds.includes(category.id)) {
         const fieldName = `bobot_${category.id}`;
-        const value = form.getValues(fieldName); // Get the raw value from the form
-        // Explicitly convert to number, handling potential string values or NaN
+        const value = allFormValues[fieldName]; // Use allFormValues directly
         const numericValue = Number(value); 
         if (!isNaN(numericValue)) {
           sum += numericValue;
@@ -253,7 +252,7 @@ const WeightSettings = () => {
       }
     });
     return sum;
-  }, [activeCategoryIds, categories, form]); // Keep 'form' as a dependency
+  }, [activeCategoryIds, categories, allFormValues]); // Changed dependency to allFormValues
 
   return (
     <div className="flex-1 space-y-8 p-4">
