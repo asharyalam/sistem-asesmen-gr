@@ -56,10 +56,10 @@ const Sidebar = () => {
     <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64 shadow-mac-md">
       <div className="flex items-center justify-center h-16 border-b border-sidebar-border mb-6">
         <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          Guru IPS App
+          Aplikasi Guru
         </span>
         <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 absolute">
-          GIA
+          AG
         </span>
       </div>
       <nav className="flex-1 space-y-2">
