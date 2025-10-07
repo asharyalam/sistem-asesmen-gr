@@ -32,7 +32,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 
 const formSchema = z.object({
   nama_siswa: z.string().min(1, { message: "Nama siswa tidak boleh kosong." }),
@@ -48,6 +48,7 @@ interface AddStudentDialogProps {
 
 const AddStudentDialog: React.FC<AddStudentDialogProps> = ({ isOpen, onClose, onStudentAdded }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Initialize useQueryClient
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,6 +97,16 @@ const AddStudentDialog: React.FC<AddStudentDialogProps> = ({ isOpen, onClose, on
       onStudentAdded();
       onClose();
       form.reset();
+
+      // Log activity
+      const className = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
+      await supabase.from('activity_log').insert({
+        user_id: user.id,
+        activity_type: 'STUDENT_ADDED',
+        description: `Menambahkan siswa baru: ${values.nama_siswa} (${values.nis_nisn}) ke kelas ${className}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['recentActivities', user.id] }); // Invalidate recent activities
+      queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] }); // Invalidate total students
     }
   };
 

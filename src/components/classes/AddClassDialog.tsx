@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
+import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 
 const formSchema = z.object({
   nama_kelas: z.string().min(1, { message: "Nama kelas tidak boleh kosong." }),
@@ -39,6 +40,7 @@ interface AddClassDialogProps {
 
 const AddClassDialog: React.FC<AddClassDialogProps> = ({ isOpen, onClose, onClassAdded }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Initialize useQueryClient
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,6 +71,15 @@ const AddClassDialog: React.FC<AddClassDialogProps> = ({ isOpen, onClose, onClas
       onClassAdded();
       onClose();
       form.reset();
+
+      // Log activity
+      await supabase.from('activity_log').insert({
+        user_id: user.id,
+        activity_type: 'CLASS_ADDED',
+        description: `Menambahkan kelas baru: ${values.nama_kelas} (${values.tahun_semester})`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['recentActivities', user.id] }); // Invalidate recent activities
+      queryClient.invalidateQueries({ queryKey: ['totalClasses', user.id] }); // Invalidate total classes
     }
   };
 

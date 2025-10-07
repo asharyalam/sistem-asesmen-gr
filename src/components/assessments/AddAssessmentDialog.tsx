@@ -38,7 +38,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { showError, showSuccess } from '@/utils/toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
 
 interface KategoriBobot {
   id: string;
@@ -63,6 +63,7 @@ interface AddAssessmentDialogProps {
 
 const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClose, onAssessmentAdded }) => {
   const { user } = useSession();
+  const queryClient = useQueryClient(); // Initialize useQueryClient
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -135,6 +136,16 @@ const AddAssessmentDialog: React.FC<AddAssessmentDialogProps> = ({ isOpen, onClo
       onAssessmentAdded();
       onClose();
       form.reset();
+
+      // Log activity
+      const className = classes?.find(c => c.id === values.id_kelas)?.nama_kelas || 'Unknown Class';
+      await supabase.from('activity_log').insert({
+        user_id: user.id,
+        activity_type: 'ASSESSMENT_ADDED',
+        description: `Menambahkan penilaian baru: ${values.nama_penilaian} untuk kelas ${className}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['recentActivities', user.id] }); // Invalidate recent activities
+      queryClient.invalidateQueries({ queryKey: ['totalAssessments', user.id] }); // Invalidate total assessments
     }
   };
 
