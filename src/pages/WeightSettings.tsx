@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label'; // Import Label component
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -109,20 +109,20 @@ const WeightSettings = () => {
     enabled: !!selectedClassId,
   });
 
-  // Dynamically create form schema based on active categories
-  const dynamicFormSchema = useMemo(() => {
-    const schemaFields: { [key: string]: z.ZodNumber } = {};
-    activeCategoryIds.forEach(categoryId => {
-      schemaFields[`bobot_${categoryId}`] = z.coerce.number().min(0).max(100, { message: "Bobot harus antara 0 dan 100." });
+  // Define a stable form schema that includes all possible bobot fields
+  const formSchema = useMemo(() => {
+    const schemaFields: { [key: string]: z.ZodNumber | z.ZodOptional<z.ZodNumber> } = {};
+    categories?.forEach(category => {
+      schemaFields[`bobot_${category.id}`] = z.coerce.number().min(0).max(100, { message: "Bobot harus antara 0 dan 100." }).optional();
     });
     return z.object({
       id_kelas: z.string().min(1, { message: "Kelas harus dipilih." }),
       ...schemaFields,
     });
-  }, [activeCategoryIds]);
+  }, [categories]); // Schema now depends only on `categories`
 
-  const form = useForm<z.infer<typeof dynamicFormSchema>>({
-    resolver: zodResolver(dynamicFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       id_kelas: "",
     },
@@ -137,6 +137,7 @@ const WeightSettings = () => {
       const defaultValues: { [key: string]: any } = { id_kelas: selectedClassId };
       categories.forEach(category => {
         const existingWeight = weightSettings?.find(ws => ws.id_kategori_bobot === category.id);
+        // Set default to existing weight or 0 if not active
         defaultValues[`bobot_${category.id}`] = existingWeight ? existingWeight.bobot_persentase : 0;
       });
       form.reset(defaultValues);
@@ -154,13 +155,13 @@ const WeightSettings = () => {
         return [...prev, categoryId];
       } else {
         // Remove from active, clear value in form
-        form.setValue(`bobot_${categoryId}` as any, 0);
+        form.setValue(`bobot_${categoryId}` as any, 0); // Set to 0 when unchecked
         return prev.filter(id => id !== categoryId);
       }
     });
   };
 
-  const onSubmit = async (values: z.infer<typeof dynamicFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
       showError("Anda harus login untuk menyimpan pengaturan bobot.");
       return;
@@ -180,7 +181,7 @@ const WeightSettings = () => {
     // Prepare data for upsert (active categories)
     activeCategoryIds.forEach(categoryId => {
       const bobotValue = values[`bobot_${categoryId}`];
-      if (typeof bobotValue === 'number') {
+      if (typeof bobotValue === 'number' && bobotValue >= 0 && bobotValue <= 100) {
         upsertData.push({
           id: weightSettings?.find(ws => ws.id_kategori_bobot === categoryId)?.id || '', // Include existing ID for update
           id_kelas: selectedClassId,
@@ -320,7 +321,7 @@ const WeightSettings = () => {
                           <FormField
                             key={category.id}
                             control={form.control}
-                            name={`bobot_${category.id}` as keyof z.infer<typeof dynamicFormSchema>}
+                            name={`bobot_${category.id}` as keyof z.infer<typeof formSchema>}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Bobot {category.nama_kategori} (%)</FormLabel>
