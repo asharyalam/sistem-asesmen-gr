@@ -61,6 +61,13 @@ const Login = () => {
           }}
           theme="light"
           redirectTo={window.location.origin + '/'}
+          i18n={{
+            en: {
+              sign_in: {
+                email_sign_in_password_mismatch: 'Email dan password salah',
+              },
+            },
+          }}
         />
       </div>
       <MadeWithDyad />

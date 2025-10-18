@@ -93,7 +93,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       subscription.unsubscribe();
       if (toastId) dismissToast(toastId);
     };
-  }, [navigate, user, queryClient]);
+  }, [navigate, queryClient]); // 'user' removed from dependencies
 
   return (
     <SessionContext.Provider value={{ session, user, loading }}>
