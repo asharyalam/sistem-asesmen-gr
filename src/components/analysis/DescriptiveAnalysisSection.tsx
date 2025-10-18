@@ -63,8 +63,8 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
           aspek_penilaian (deskripsi, skor_maksimal, urutan, id_penilaian),
           penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
         `)
-        .eq('penilaian.id_kelas', selectedClassId)
-        .order('penilaian.tanggal', { ascending: true });
+        .eq('penilaian.id_kelas', selectedClassId);
+        // Removed .order('penilaian.tanggal', { ascending: true }) to fix the error
 
       if (error) {
         throw new Error(error.message);
