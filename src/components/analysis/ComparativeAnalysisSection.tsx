@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
 import { calculateClassAverage } from '@/utils/analysisUtils';
 import { useSession } from '@/components/auth/SessionContextProvider';
+import AnalysisInterpretationCard from './AnalysisInterpretationCard'; // Import komponen baru
 
 const COMPARISON_COLORS = ['#8884d8', '#82ca9d']; // Colors for comparative bar chart
 
@@ -190,6 +191,32 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
                   <Bar dataKey="averageScore" fill={COMPARISON_COLORS[0]} />
                 </BarChart>
               </ResponsiveContainer>
+
+              {/* New: Interpretation Card for Comparative Analysis */}
+              <div className="mt-6">
+                <AnalysisInterpretationCard
+                  title="Interpretasi Analisis Perbandingan (Bar Chart)"
+                  description="Bar chart ini membandingkan rata-rata skor keseluruhan antara dua kelas yang Anda pilih. Setiap bar mewakili rata-rata skor satu kelas."
+                  interpretationPoints={[
+                    {
+                      title: "Perbedaan Rata-rata",
+                      description: "Perhatikan perbedaan tinggi bar antara kedua kelas. Kelas dengan bar lebih tinggi memiliki rata-rata kinerja yang lebih baik secara keseluruhan."
+                    },
+                    {
+                      title: "Kesenjangan Kinerja",
+                      description: "Jika ada perbedaan yang signifikan, ini menunjukkan kesenjangan kinerja antara kedua kelas. Anda mungkin ingin menyelidiki faktor-faktor yang berkontribusi terhadap perbedaan ini (misalnya, metode pengajaran, komposisi siswa, sumber daya)."
+                    },
+                    {
+                      title: "Kinerja Serupa",
+                      description: "Jika tinggi bar relatif sama, ini menunjukkan bahwa kedua kelas memiliki kinerja rata-rata yang serupa. Ini bisa menjadi indikasi konsistensi dalam pengajaran atau tingkat pemahaman siswa."
+                    },
+                    {
+                      title: "Tindakan Lanjut",
+                      description: "Gunakan informasi ini untuk mengidentifikasi kelas yang mungkin memerlukan perhatian lebih atau untuk berbagi praktik terbaik dari kelas berkinerja tinggi."
+                    }
+                  ]}
+                />
+              </div>
             </>
           ) : (
             <p className="text-muted-foreground">Tidak ada data nilai untuk kelas yang dipilih.</p>
