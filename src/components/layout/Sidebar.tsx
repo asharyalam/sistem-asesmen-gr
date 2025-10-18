@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react";
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, User } from "lucide-react"; // Import User icon
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,11 @@ const Sidebar = () => {
       name: "Analisis Statistik",
       icon: TrendingUp,
       path: "/statistical-analysis",
+    },
+    {
+      name: "Profil", // New Profile link
+      icon: User,
+      path: "/profile",
     },
   ];
 

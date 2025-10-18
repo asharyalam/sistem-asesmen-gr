@@ -24,7 +24,8 @@ export type ActivityType =
   | 'WEIGHT_SETTINGS_SAVED'
   | 'STUDENTS_IMPORTED'
   | 'LOGIN'
-  | 'LOGOUT';
+  | 'LOGOUT'
+  | 'PROFILE_UPDATED'; // New activity type
 
 export const logActivity = async (user: User | null, activity_type: ActivityType, description: string, queryClient: QueryClient) => {
   if (!user) {

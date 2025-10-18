@@ -15,6 +15,7 @@ import ScoreInput from "./pages/ScoreInput";
 import AttendanceInput from "./pages/AttendanceInput";
 import AttendanceReport from "./pages/AttendanceReport";
 import StatisticalAnalysis from "./pages/StatisticalAnalysis";
+import Profile from "./pages/Profile"; // Import the new Profile page
 import { SessionContextProvider } from "./components/auth/SessionContextProvider";
 import AuthLayout from "./components/layout/AuthLayout";
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/attendance/report" element={<AuthLayout><AttendanceReport /></AuthLayout>} />
             <Route path="/weight-settings" element={<AuthLayout><WeightSettings /></AuthLayout>} />
             <Route path="/statistical-analysis" element={<AuthLayout><StatisticalAnalysis /></AuthLayout>} />
+            <Route path="/profile" element={<AuthLayout><Profile /></AuthLayout>} /> {/* New Profile Route */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             {/* Protected routes will go inside AuthLayout */}
             <Route path="*" element={<NotFound />} />
