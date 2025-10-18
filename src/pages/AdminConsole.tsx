@@ -43,7 +43,7 @@ const AdminConsole = () => {
         </TabsList>
 
         <TabsContent value="kelas" className="space-y-8 mt-6">
-          <AdminSection<Kelas>
+          <AdminSection<Kelas> {/* Parameter tipe generik harus langsung mengikuti nama komponen */}
             tableName="kelas"
             title="Manajemen Kelas"
             description="Kelola data kelas yang terdaftar di sistem."
@@ -56,7 +56,7 @@ const AdminConsole = () => {
         </TabsContent>
 
         <TabsContent value="kategori_bobot" className="space-y-8 mt-6">
-          <AdminSection<KategoriBobot>
+          <AdminSection<KategoriBobot> {/* Parameter tipe generik harus langsung mengikuti nama komponen */}
             tableName="kategori_bobot"
             title="Manajemen Kategori Bobot"
             description="Kelola kategori bobot yang digunakan dalam penilaian."
