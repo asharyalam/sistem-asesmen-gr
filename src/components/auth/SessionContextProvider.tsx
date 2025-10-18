@@ -27,7 +27,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
     let toastId: string | undefined;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state change event detected:", event); // Log event yang terdeteksi
+      console.log("Auth state change event detected:", event);
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         setSession(currentSession);
         setUser(currentSession?.user || null);
@@ -38,16 +38,19 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
           await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`, queryClient);
         }
       } else if (event === 'SIGNED_OUT') {
-        console.log("SIGNED_OUT event detected. Navigating to /login."); // Log ketika event SIGNED_OUT terdeteksi
+        console.log("SIGNED_OUT event detected. Attempting to navigate to /login immediately.");
+        navigate('/login'); // Pindahkan navigasi ke sini agar diprioritaskan
+
         if (user) {
-          await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`, queryClient);
+          // Log activity secara asinkron setelah navigasi
+          logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`, queryClient)
+            .catch(err => console.error("Failed to log logout activity:", err));
         }
         setSession(null);
         setUser(null);
         setLoading(false);
         if (toastId) dismissToast(toastId);
         showSuccess("Anda telah berhasil logout.");
-        navigate('/login');
       } else if (event === 'INITIAL_SESSION') {
         setSession(currentSession);
         setUser(currentSession?.user || null);
