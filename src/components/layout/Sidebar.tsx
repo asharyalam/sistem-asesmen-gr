@@ -5,7 +5,7 @@ import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { showError } from "@/utils/toast"; // showSuccess dihapus dari sini
+import { showError } from "@/utils/toast";
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { logActivity } from '@/utils/activityLogger';
 
@@ -37,6 +37,7 @@ const Sidebar = () => {
   ];
 
   const handleLogout = async () => {
+    console.log("Logout button clicked!"); // Menambahkan log untuk debugging
     const { error } = await supabase.auth.signOut();
     if (error) {
       showError("Gagal logout: " + error.message);
@@ -45,7 +46,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64 shadow-mac-md">
+    <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64 shadow-mac-md relative z-50">
       <div className="flex items-center justify-center h-16 border-b border-sidebar-border mb-6">
         <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           Aplikasi Guru
@@ -77,7 +78,7 @@ const Sidebar = () => {
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg"
+          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg cursor-pointer"
         >
           <LogOut className="h-5 w-5 mr-3 flex-shrink-0" />
           <span className="whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
