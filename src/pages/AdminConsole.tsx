@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } => '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Perbaikan di sini
 import AdminSection from '@/components/admin/AdminSection';
 import AddKelasDialog from '@/components/admin/kelas/AddKelasDialog';
 import EditKelasDialog from '@/components/admin/kelas/EditKelasDialog';
