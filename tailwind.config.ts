@@ -33,8 +33,8 @@ export default {
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "0 84.2% 60.2%",
+          foreground: "210 40% 98%",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -86,6 +86,10 @@ export default {
         weightSettingsAccent: {
           DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink
           foreground: "hsl(0 0% 100%)", // White text
+        },
+        adminAccent: { // New accent color for Admin Console
+          DEFAULT: "hsl(240 50% 40%)", // Darker Indigo
+          foreground: "hsl(0 0% 100%)",
         },
       },
       borderRadius: {

@@ -1,17 +1,17 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react"; // Menghapus Users dan BarChart3
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, ShieldCheck } from "lucide-react"; // Menambahkan ShieldCheck untuk Admin
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
-import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { useSession } from '@/components/auth/SessionContextProvider';
+import { logActivity } from '@/utils/activityLogger';
 
 const Sidebar = () => {
   const location = useLocation();
-  const { user } = useSession(); // Get user from session
+  const { user } = useSession();
 
   const navItems = [
     {
@@ -34,6 +34,11 @@ const Sidebar = () => {
       icon: TrendingUp,
       path: "/statistical-analysis",
     },
+    {
+      name: "Konsol Admin", // Item baru untuk Admin Console
+      icon: ShieldCheck,
+      path: "/admin",
+    },
   ];
 
   const handleLogout = async () => {
@@ -42,7 +47,6 @@ const Sidebar = () => {
       showError("Gagal logout: " + error.message);
     } else {
       showSuccess("Berhasil logout!");
-      // logActivity is now handled in SessionContextProvider's onAuthStateChange for 'SIGNED_OUT' event
     }
   };
 
