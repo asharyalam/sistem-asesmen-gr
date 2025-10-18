@@ -60,11 +60,15 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
           id_siswa,
           id_aspek,
           skor_diperoleh,
-          aspek_penilaian (deskripsi, skor_maksimal, urutan, id_penilaian),
-          penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
+          aspek_penilaian (
+            deskripsi,
+            skor_maksimal,
+            urutan,
+            id_penilaian,
+            penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
+          )
         `)
-        .eq('penilaian.id_kelas', selectedClassId);
-        // Removed .order('penilaian.tanggal', { ascending: true }) to fix the error
+        .eq('aspek_penilaian.penilaian.id_kelas', selectedClassId); // Filter melalui jalur yang eksplisit
 
       if (error) {
         throw new Error(error.message);
@@ -135,13 +139,13 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
 
     const scoresByAssessment: { [assessmentId: string]: { totalScore: number; maxPossibleScore: number; date: string; name: string } } = {};
     studentScores.forEach(score => {
-      const assessmentId = score.penilaian.id;
+      const assessmentId = score.aspek_penilaian.penilaian.id;
       if (!scoresByAssessment[assessmentId]) {
         scoresByAssessment[assessmentId] = {
           totalScore: 0,
           maxPossibleScore: 0,
-          date: score.penilaian.tanggal,
-          name: score.penilaian.nama_penilaian,
+          date: score.aspek_penilaian.penilaian.tanggal,
+          name: score.aspek_penilaian.penilaian.nama_penilaian,
         };
       }
       scoresByAssessment[assessmentId].totalScore += score.skor_diperoleh;
