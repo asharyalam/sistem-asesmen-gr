@@ -189,13 +189,14 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
                   <Legend />
                   <Bar dataKey="averageScore" fill={COMPARISON_COLORS[0]} />
                 </BarChart>
-              </>
-            ) : (
-              <p className="text-muted-foreground">Tidak ada data nilai untuk kelas yang dipilih.</p>
-            )
+              </ResponsiveContainer>
+            </>
           ) : (
-            <p className="text-muted-foreground">Pilih dua kelas untuk membandingkan kinerja.</p>
-          )}
+            <p className="text-muted-foreground">Tidak ada data nilai untuk kelas yang dipilih.</p>
+          )
+        ) : (
+          <p className="text-muted-foreground">Pilih dua kelas untuk membandingkan kinerja.</p>
+        )}
       </CardContent>
     </Card>
   );
