@@ -87,10 +87,6 @@ export default {
           DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink
           foreground: "hsl(0 0% 100%)", // White text
         },
-        adminAccent: { // New accent color for Admin Console
-          DEFAULT: "hsl(240 50% 40%)", // Darker Indigo
-          foreground: "hsl(0 0% 100%)", // White text
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
