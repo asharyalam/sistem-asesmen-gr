@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Perbaikan di sini
-import AdminSection from '@/components/admin/AdminSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminSection from '@/components/admin/AdminSection'; // Tetap import AdminSection jika masih digunakan di tempat lain
 import AddKelasDialog from '@/components/admin/kelas/AddKelasDialog';
 import EditKelasDialog from '@/components/admin/kelas/EditKelasDialog';
 import AddKategoriBobotDialog from '@/components/admin/kategori_bobot/AddKategoriBobotDialog';
@@ -12,6 +12,10 @@ import EditKategoriBobotDialog from '@/components/admin/kategori_bobot/EditKateg
 import ActivityLogTable from '@/components/admin/ActivityLogTable';
 import { Kelas } from '@/types/analysis'; // Re-use existing type
 import { KategoriBobot } from '@/components/weight-settings/ManageWeightCategoriesDialog'; // Re-use existing type
+
+// Import komponen pembungkus baru
+import KelasAdminSection from '@/components/admin/kelas/KelasAdminSection';
+import KategoriBobotAdminSection from '@/components/admin/kategori_bobot/KategoriBobotAdminSection';
 
 const AdminConsole = () => {
   const [activeTab, setActiveTab] = useState('kelas');
@@ -43,29 +47,11 @@ const AdminConsole = () => {
         </TabsList>
 
         <TabsContent value="kelas" className="space-y-8 mt-6">
-          <AdminSection<Kelas>
-            tableName="kelas"
-            title="Manajemen Kelas"
-            description="Kelola data kelas yang terdaftar di sistem."
-            columns={kelasColumns}
-            AddDialogComponent={AddKelasDialog}
-            EditDialogComponent={EditKelasDialog}
-            deleteActivityType="CLASS_DELETED"
-            deleteDescription={(item) => `Menghapus kelas: ${item.nama_kelas} (${item.tahun_semester})`}
-          />
+          <KelasAdminSection columns={kelasColumns} />
         </TabsContent>
 
         <TabsContent value="kategori_bobot" className="space-y-8 mt-6">
-          <AdminSection<KategoriBobot>
-            tableName="kategori_bobot"
-            title="Manajemen Kategori Bobot"
-            description="Kelola kategori bobot yang digunakan dalam penilaian."
-            columns={kategoriBobotColumns}
-            AddDialogComponent={AddKategoriBobotDialog}
-            EditDialogComponent={EditKategoriBobotDialog}
-            deleteActivityType="WEIGHT_CATEGORY_DELETED"
-            deleteDescription={(item) => `Menghapus kategori bobot: ${item.nama_kategori}`}
-          />
+          <KategoriBobotAdminSection columns={kategoriBobotColumns} />
         </TabsContent>
 
         {/* Tambahkan TabsContent untuk tabel lain di sini */}
