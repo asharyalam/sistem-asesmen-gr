@@ -18,14 +18,36 @@ export const calculateClassAverage = (scores: NilaiAspekSiswa[], studentsInClass
     if (!acc[score.id_siswa]) {
       acc[score.id_siswa] = {};
     }
-    // Mengakses penilaian melalui aspek_penilaian
-    if (!acc[score.id_siswa][score.aspek_penilaian.penilaian.id]) {
-      acc[score.id_siswa][score.aspek_penilaian.penilaian.id] = { studentScore: 0, maxScore: 0 };
+    // Mengakses penilaian melalui aspek_penilaian, tambahkan pemeriksaan null
+    if (!score.aspek_penilaian || !score.aspek_penilaian.penilaian) {
+      return acc; // Lewati skor ini jika aspek_penilaian atau penilaian bersarangnya null
     }
-    acc[score.id_siswa][score.aspek_penilaian.penilaian.id].studentScore += score.skor_diperoleh;
-    acc[score.id_siswa][score.aspek_penilaian.penilaian.id].maxScore += score.aspek_penilaian.skor_maksimal;
+    const assessmentId = score.aspek_penilaian.penilaian.id;
+    if (!acc[score.id_siswa][assessmentId]) {
+      acc[score.id_siswa][assessmentId] = { studentScore: 0, maxScore: 0 };
+    }
+    acc[score.id_siswa][assessmentId].studentScore += score.skor_diperoleh;
+    acc[score.id_siswa][assessmentId].maxScore += score.aspek_penilaian.skor_maksimal;
     return acc;
   }, {} as { [studentId: string]: { [assessmentId: string]: { studentScore: number; maxScore: number } } });
+
+  // Calculate average percentage for each student
+  for (const studentId in scoresGroupedByStudentAndAssessment) {
+    const assessmentsForStudent = scoresGroupedByStudentAndAssessment[studentId];
+    let totalStudentAssessmentPercentage = 0;
+    let assessmentCount = 0;
+
+    for (const assessmentId in assessmentsForStudent) {
+      const { studentScore, maxScore } = assessmentsForStudent[assessmentId];
+      if (maxScore > 0) {
+        totalStudentAssessmentPercentage += (studentScore / maxScore) * 100;
+        assessmentCount++;
+      }
+    }
+    if (assessmentCount > 0) {
+      studentOverallPercentages[studentId].push(totalStudentAssessmentPercentage / assessmentCount);
+    }
+  }
 
   let totalClassAverage = 0;
   let studentsWithScoresCount = 0;

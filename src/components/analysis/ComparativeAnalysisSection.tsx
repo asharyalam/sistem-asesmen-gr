@@ -71,10 +71,13 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         .select(`
           id_siswa,
           skor_diperoleh,
-          aspek_penilaian (skor_maksimal, id_penilaian),
-          penilaian (id)
+          aspek_penilaian (
+            skor_maksimal,
+            id_penilaian,
+            penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
+          )
         `)
-        .eq('penilaian.id_kelas', selectedComparisonClassId1);
+        .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId1);
       if (error) throw new Error(error.message);
       return data || [];
     },
@@ -90,10 +93,13 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         .select(`
           id_siswa,
           skor_diperoleh,
-          aspek_penilaian (skor_maksimal, id_penilaian),
-          penilaian (id)
+          aspek_penilaian (
+            skor_maksimal,
+            id_penilaian,
+            penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
+          )
         `)
-        .eq('penilaian.id_kelas', selectedComparisonClassId2);
+        .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId2);
       if (error) throw new Error(error.message);
       return data || [];
     },
@@ -183,14 +189,13 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
                   <Legend />
                   <Bar dataKey="averageScore" fill={COMPARISON_COLORS[0]} />
                 </BarChart>
-              </ResponsiveContainer>
-            </>
+              </>
+            ) : (
+              <p className="text-muted-foreground">Tidak ada data nilai untuk kelas yang dipilih.</p>
+            )
           ) : (
-            <p className="text-muted-foreground">Tidak ada data nilai untuk kelas yang dipilih.</p>
-          )
-        ) : (
-          <p className="text-muted-foreground">Pilih dua kelas untuk membandingkan kinerja.</p>
-        )}
+            <p className="text-muted-foreground">Pilih dua kelas untuk membandingkan kinerja.</p>
+          )}
       </CardContent>
     </Card>
   );
