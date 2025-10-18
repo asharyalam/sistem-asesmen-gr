@@ -4,9 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { showLoading, dismissToast, showError } from '@/utils/toast';
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
-import { useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { showLoading, dismissToast, showError, showSuccess } from '@/utils/toast'; // Import showSuccess
+import { logActivity } from '@/utils/activityLogger';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SessionContextType {
   session: Session | null;
@@ -21,7 +21,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const queryClient = useQueryClient(); // Get queryClient here
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let toastId: string | undefined;
@@ -32,19 +32,20 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
         setUser(currentSession?.user || null);
         setLoading(false);
         if (toastId) dismissToast(toastId);
-        navigate('/'); // Redirect to dashboard after login
+        navigate('/');
         if (currentSession?.user) {
           await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`, queryClient);
         }
       } else if (event === 'SIGNED_OUT') {
-        if (user) { // Log logout for the user who was signed in
+        if (user) {
           await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`, queryClient);
         }
         setSession(null);
         setUser(null);
         setLoading(false);
         if (toastId) dismissToast(toastId);
-        navigate('/login'); // Redirect to login after logout
+        showSuccess("Anda telah berhasil logout."); // Menampilkan pesan sukses di sini
+        navigate('/login');
       } else if (event === 'INITIAL_SESSION') {
         setSession(currentSession);
         setUser(currentSession?.user || null);
@@ -87,7 +88,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       subscription.unsubscribe();
       if (toastId) dismissToast(toastId);
     };
-  }, [navigate, user, queryClient]); // Added queryClient to dependency array
+  }, [navigate, user, queryClient]);
 
   return (
     <SessionContext.Provider value={{ session, user, loading }}>

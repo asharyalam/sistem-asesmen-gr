@@ -1,11 +1,11 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react"; // Menghapus ShieldCheck
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { showError, showSuccess } from "@/utils/toast";
+import { showError } from "@/utils/toast"; // showSuccess dihapus dari sini
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { logActivity } from '@/utils/activityLogger';
 
@@ -34,20 +34,14 @@ const Sidebar = () => {
       icon: TrendingUp,
       path: "/statistical-analysis",
     },
-    // {
-    //   name: "Konsol Admin", // Item ini dihapus
-    //   icon: ShieldCheck,
-    //   path: "/admin",
-    // },
   ];
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       showError("Gagal logout: " + error.message);
-    } else {
-      showSuccess("Berhasil logout!");
     }
+    // Pesan sukses sekarang akan ditangani oleh SessionContextProvider
   };
 
   return (
