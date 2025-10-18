@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError } from '@/utils/toast';
 import { useSession } from '@/components/auth/SessionContextProvider';
+import AnalysisInterpretationCard from './AnalysisInterpretationCard'; // Import komponen baru
 
 const RELATION_COLORS = ['#ffc658', '#83a6ed']; // Colors for relational scatter plot
 
@@ -219,6 +220,32 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
                   <Scatter name="Siswa" data={relationalAnalysisData} fill={RELATION_COLORS[0]} />
                 </ScatterChart>
               </ResponsiveContainer>
+
+              {/* New: Interpretation Card */}
+              <div className="mt-6">
+                <AnalysisInterpretationCard
+                  title="Interpretasi Analisis Hubungan (Scatter Plot)"
+                  description="Scatter plot ini menunjukkan bagaimana skor siswa pada dua aspek penilaian saling berhubungan. Setiap titik mewakili satu siswa, dengan posisi X adalah skor pada aspek pertama dan posisi Y adalah skor pada aspek kedua."
+                  interpretationPoints={[
+                    {
+                      title: "Korelasi Positif",
+                      description: "Jika titik-titik cenderung naik dari kiri bawah ke kanan atas, berarti siswa yang mendapat skor tinggi pada satu aspek juga cenderung mendapat skor tinggi pada aspek lainnya. Ini menunjukkan kedua aspek mungkin mengukur kemampuan yang serupa atau saling mendukung."
+                    },
+                    {
+                      title: "Korelasi Negatif",
+                      description: "Jika titik-titik cenderung turun dari kiri atas ke kanan bawah, berarti siswa yang mendapat skor tinggi pada satu aspek cenderung mendapat skor rendah pada aspek lainnya. Ini jarang terjadi pada penilaian yang baik, tetapi bisa menunjukkan aspek-aspek yang bertentangan atau salah satu aspek terlalu sulit/mudah."
+                    },
+                    {
+                      title: "Tidak Ada Korelasi",
+                      description: "Jika titik-titik tersebar secara acak tanpa pola yang jelas, berarti tidak ada hubungan yang signifikan antara skor pada kedua aspek. Ini menunjukkan kedua aspek mungkin mengukur kemampuan yang berbeda secara independen."
+                    },
+                    {
+                      title: "Kekuatan Korelasi",
+                      description: "Semakin rapat titik-titik membentuk garis, semakin kuat korelasinya. Semakin menyebar, semakin lemah korelasinya."
+                    }
+                  ]}
+                />
+              </div>
             </>
           ) : (
             <p className="text-muted-foreground">Tidak ada data nilai untuk aspek yang dipilih dalam penilaian ini.</p>
