@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react";
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +34,11 @@ const Sidebar = () => {
       icon: TrendingUp,
       path: "/statistical-analysis",
     },
+    {
+      name: "Konsol Admin",
+      icon: Settings2,
+      path: "/admin",
+    },
   ];
 
   const handleLogout = async () => {
@@ -41,11 +46,10 @@ const Sidebar = () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       showError("Gagal logout: " + error.message);
-      console.error("Supabase signOut error:", error); // Log error jika ada
+      console.error("Supabase signOut error:", error);
     } else {
-      console.log("Supabase signOut call completed successfully (no immediate error). Waiting for auth state change..."); // Log jika tidak ada error
+      console.log("Supabase signOut call completed successfully (no immediate error). Waiting for auth state change...");
     }
-    // Pesan sukses sekarang akan ditangani oleh SessionContextProvider
   };
 
   return (
