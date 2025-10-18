@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, ShieldCheck } from "lucide-react"; // Menambahkan ShieldCheck untuk Admin
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp } from "lucide-react"; // Menghapus ShieldCheck
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,11 +34,11 @@ const Sidebar = () => {
       icon: TrendingUp,
       path: "/statistical-analysis",
     },
-    {
-      name: "Konsol Admin", // Item baru untuk Admin Console
-      icon: ShieldCheck,
-      path: "/admin",
-    },
+    // {
+    //   name: "Konsol Admin", // Item ini dihapus
+    //   icon: ShieldCheck,
+    //   path: "/admin",
+    // },
   ];
 
   const handleLogout = async () => {

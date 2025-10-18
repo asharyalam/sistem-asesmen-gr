@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks, Settings } from 'lucide-react';
+import { PlusCircle, ClipboardList, Edit, Trash2, ListChecks, Settings, Download } from 'lucide-react';
 import AddAssessmentDialog from '@/components/assessments/AddAssessmentDialog';
 import EditAssessmentDialog from '@/components/assessments/EditAssessmentDialog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -22,8 +22,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'; // Import Dialog components
 import { useNavigate } from 'react-router-dom';
 import { logActivity } from '@/utils/activityLogger';
+import ScoreExportTool from '@/components/admin/ScoreExportTool'; // Import ScoreExportTool
 
 interface Penilaian {
   id: string;
@@ -52,6 +54,7 @@ const Assessments = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [assessmentToDeleteId, setAssessmentToDeleteId] = useState<string | null>(null);
   const [assessmentToDeleteName, setAssessmentToDeleteName] = useState<string | null>(null);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); // State for export dialog
   const queryClient = useQueryClient();
 
   const { data: assessments, isLoading, isError, error } = useQuery<Penilaian[], Error>({
@@ -149,6 +152,12 @@ const Assessments = () => {
               className="rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-mac-sm"
             >
               <ListChecks className="mr-2 h-4 w-4" /> Input Nilai
+            </Button>
+            <Button
+              onClick={() => setIsExportDialogOpen(true)} // Open export dialog
+              className="rounded-lg bg-green-600 text-white hover:bg-green-700 shadow-mac-sm" // New button for export
+            >
+              <Download className="mr-2 h-4 w-4" /> Ekspor Nilai
             </Button>
             <Button
               onClick={() => setIsAddAssessmentDialogOpen(true)}
@@ -251,6 +260,19 @@ const Assessments = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Export Scores Dialog */}
+      <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-xl shadow-mac-lg">
+          <DialogHeader>
+            <DialogTitle>Ekspor Nilai ke Excel</DialogTitle>
+            <DialogDescription>
+              Pilih kelas dan penilaian untuk mengekspor data nilai siswa ke file Excel.
+            </DialogDescription>
+          </DialogHeader>
+          <ScoreExportTool />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
