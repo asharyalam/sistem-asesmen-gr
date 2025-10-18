@@ -37,10 +37,13 @@ const Sidebar = () => {
   ];
 
   const handleLogout = async () => {
-    console.log("Logout button clicked!"); // Menambahkan log untuk debugging
+    console.log("Logout button clicked!");
     const { error } = await supabase.auth.signOut();
     if (error) {
       showError("Gagal logout: " + error.message);
+      console.error("Supabase signOut error:", error); // Log error jika ada
+    } else {
+      console.log("Supabase signOut call completed successfully (no immediate error). Waiting for auth state change..."); // Log jika tidak ada error
     }
     // Pesan sukses sekarang akan ditangani oleh SessionContextProvider
   };

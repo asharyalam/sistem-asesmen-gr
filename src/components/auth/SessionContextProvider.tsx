@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { showLoading, dismissToast, showError, showSuccess } from '@/utils/toast'; // Import showSuccess
+import { showLoading, dismissToast, showError, showSuccess } from '@/utils/toast';
 import { logActivity } from '@/utils/activityLogger';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -27,6 +27,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
     let toastId: string | undefined;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state change event detected:", event); // Log event yang terdeteksi
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         setSession(currentSession);
         setUser(currentSession?.user || null);
@@ -37,6 +38,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
           await logActivity(currentSession.user, 'LOGIN', `Pengguna ${currentSession.user.email} berhasil login.`, queryClient);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log("SIGNED_OUT event detected. Navigating to /login."); // Log ketika event SIGNED_OUT terdeteksi
         if (user) {
           await logActivity(user, 'LOGOUT', `Pengguna ${user.email} berhasil logout.`, queryClient);
         }
@@ -44,7 +46,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
         setUser(null);
         setLoading(false);
         if (toastId) dismissToast(toastId);
-        showSuccess("Anda telah berhasil logout."); // Menampilkan pesan sukses di sini
+        showSuccess("Anda telah berhasil logout.");
         navigate('/login');
       } else if (event === 'INITIAL_SESSION') {
         setSession(currentSession);
