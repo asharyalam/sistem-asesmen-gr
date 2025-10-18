@@ -27,12 +27,16 @@ export interface AspekPenilaian {
   id_penilaian: string;
 }
 
+// New interface to represent the fetched aspect with nested assessment
+export interface FetchedAspekPenilaian extends AspekPenilaian {
+  penilaian: Penilaian;
+}
+
 export interface NilaiAspekSiswa {
   id_siswa: string;
   id_aspek: string;
   skor_diperoleh: number;
-  aspek_penilaian: AspekPenilaian;
-  penilaian: Penilaian;
+  aspek_penilaian: FetchedAspekPenilaian; // Use the new interface here
 }
 
 export interface KehadiranRecord {

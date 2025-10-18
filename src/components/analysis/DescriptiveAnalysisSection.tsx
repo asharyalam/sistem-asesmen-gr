@@ -139,6 +139,7 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
 
     const scoresByAssessment: { [assessmentId: string]: { totalScore: number; maxPossibleScore: number; date: string; name: string } } = {};
     studentScores.forEach(score => {
+      // Mengakses penilaian melalui aspek_penilaian
       const assessmentId = score.aspek_penilaian.penilaian.id;
       if (!scoresByAssessment[assessmentId]) {
         scoresByAssessment[assessmentId] = {

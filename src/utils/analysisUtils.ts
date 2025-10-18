@@ -1,3 +1,5 @@
+"use client";
+
 import { NilaiAspekSiswa, Siswa, AspekPenilaian, Penilaian } from '@/types/analysis';
 
 // Helper function to calculate class average
@@ -16,25 +18,14 @@ export const calculateClassAverage = (scores: NilaiAspekSiswa[], studentsInClass
     if (!acc[score.id_siswa]) {
       acc[score.id_siswa] = {};
     }
-    if (!acc[score.id_siswa][score.penilaian.id]) {
-      acc[score.id_siswa][score.penilaian.id] = { studentScore: 0, maxScore: 0 };
+    // Mengakses penilaian melalui aspek_penilaian
+    if (!acc[score.id_siswa][score.aspek_penilaian.penilaian.id]) {
+      acc[score.id_siswa][score.aspek_penilaian.penilaian.id] = { studentScore: 0, maxScore: 0 };
     }
-    acc[score.id_siswa][score.penilaian.id].studentScore += score.skor_diperoleh;
-    acc[score.id_siswa][score.penilaian.id].maxScore += score.aspek_penilaian.skor_maksimal;
+    acc[score.id_siswa][score.aspek_penilaian.penilaian.id].studentScore += score.skor_diperoleh;
+    acc[score.id_siswa][score.aspek_penilaian.penilaian.id].maxScore += score.aspek_penilaian.skor_maksimal;
     return acc;
   }, {} as { [studentId: string]: { [assessmentId: string]: { studentScore: number; maxScore: number } } });
-
-  for (const studentId in scoresGroupedByStudentAndAssessment) {
-    const student = studentsInClass.find(s => s.id === studentId);
-    if (student) { // Only process if student exists in the current class context
-      for (const assessmentId in scoresGroupedByStudentAndAssessment[studentId]) {
-        const data = scoresGroupedByStudentAndAssessment[studentId][assessmentId];
-        if (data.maxScore > 0) {
-          studentOverallPercentages[studentId].push((data.studentScore / data.maxScore) * 100);
-        }
-      }
-    }
-  }
 
   let totalClassAverage = 0;
   let studentsWithScoresCount = 0;
