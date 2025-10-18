@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } => '@/components/ui/tabs';
 import AdminSection from '@/components/admin/AdminSection';
 import AddKelasDialog from '@/components/admin/kelas/AddKelasDialog';
 import EditKelasDialog from '@/components/admin/kelas/EditKelasDialog';
@@ -43,7 +43,7 @@ const AdminConsole = () => {
         </TabsList>
 
         <TabsContent value="kelas" className="space-y-8 mt-6">
-          <AdminSection<Kelas> {/* Parameter tipe generik harus langsung mengikuti nama komponen */}
+          <AdminSection<Kelas>
             tableName="kelas"
             title="Manajemen Kelas"
             description="Kelola data kelas yang terdaftar di sistem."
@@ -56,7 +56,7 @@ const AdminConsole = () => {
         </TabsContent>
 
         <TabsContent value="kategori_bobot" className="space-y-8 mt-6">
-          <AdminSection<KategoriBobot> {/* Parameter tipe generik harus langsung mengikuti nama komponen */}
+          <AdminSection<KategoriBobot>
             tableName="kategori_bobot"
             title="Manajemen Kategori Bobot"
             description="Kelola kategori bobot yang digunakan dalam penilaian."
