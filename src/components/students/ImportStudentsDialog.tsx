@@ -79,6 +79,8 @@ const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onC
       const worksheet = workbook.Sheets[sheetName];
       const json: any[] = XLSX.utils.sheet_to_json(worksheet);
 
+      console.log("Raw JSON from Excel:", json); // DEBUG: Log raw JSON
+
       // Assuming the Excel columns are 'Nama Siswa', 'NIS/NISN', 'Nama Kelas'
       const students: ParsedStudent[] = json.map((row) => ({
         nama_siswa: row['Nama Siswa'] || '',
