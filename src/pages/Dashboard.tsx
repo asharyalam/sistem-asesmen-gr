@@ -1,11 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Book, Users, ClipboardList, History } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +26,7 @@ const Dashboard = () => {
   const queryClient = useQueryClient(); // Get queryClient here
 
   // Fetch total classes
-  const { data: totalClasses = 0, isLoading: isLoadingClasses } = useQuery<number, Error>({
+  const { data: totalClasses = 0, isLoading: isLoadingClasses, isError: isErrorClasses, error: classesError } = useQuery<number, Error>({
     queryKey: ['totalClasses', user?.id],
     queryFn: async () => {
       if (!user) return 0;
@@ -42,7 +42,7 @@ const Dashboard = () => {
   });
 
   // Fetch class IDs for the current user, to be used by other queries
-  const { data: userClassIds, isLoading: isLoadingUserClassIds } = useQuery<string[], Error>({
+  const { data: userClassIds, isLoading: isLoadingUserClassIds, isError: isErrorUserClassIds, error: userClassIdsError } = useQuery<string[], Error>({
     queryKey: ['userClassIds', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -58,7 +58,7 @@ const Dashboard = () => {
   });
 
   // Fetch total students using the fetched class IDs
-  const { data: totalStudents = 0, isLoading: isLoadingStudents } = useQuery<number, Error>({
+  const { data: totalStudents = 0, isLoading: isLoadingStudents, isError: isErrorStudents, error: studentsError } = useQuery<number, Error>({
     queryKey: ['totalStudents', user?.id, userClassIds],
     queryFn: async () => {
       if (!user || !userClassIds || userClassIds.length === 0) return 0;
@@ -70,11 +70,11 @@ const Dashboard = () => {
       if (error) throw new Error(error.message);
       return count || 0;
     },
-    enabled: !!user && !isLoadingUserClassIds && userClassIds !== undefined,
+    enabled: !!user && !isLoadingUserClassIds, // Simplified condition
   });
 
   // Fetch total active assessments using the fetched class IDs
-  const { data: totalAssessments = 0, isLoading: isLoadingAssessments } = useQuery<number, Error>({
+  const { data: totalAssessments = 0, isLoading: isLoadingAssessments, isError: isErrorAssessments, error: assessmentsError } = useQuery<number, Error>({
     queryKey: ['totalAssessments', user?.id, userClassIds],
     queryFn: async () => {
       if (!user || !userClassIds || userClassIds.length === 0) return 0;
@@ -86,7 +86,7 @@ const Dashboard = () => {
       if (error) throw new Error(error.message);
       return count || 0;
     },
-    enabled: !!user && !isLoadingUserClassIds && userClassIds !== undefined,
+    enabled: !!user && !isLoadingUserClassIds, // Simplified condition
   });
 
   // Fetch recent activities
@@ -106,6 +106,14 @@ const Dashboard = () => {
     },
     enabled: !!user,
   });
+
+  // Error logging for queries
+  useEffect(() => {
+    if (isErrorClasses) console.error("Error fetching total classes:", classesError);
+    if (isErrorUserClassIds) console.error("Error fetching user class IDs:", userClassIdsError);
+    if (isErrorStudents) console.error("Error fetching total students:", studentsError);
+    if (isErrorAssessments) console.error("Error fetching total assessments:", assessmentsError);
+  }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError, isErrorAssessments, assessmentsError]);
 
   return (
     <div className="flex-1 space-y-8 p-4">
