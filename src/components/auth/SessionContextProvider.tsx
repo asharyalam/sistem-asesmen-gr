@@ -47,31 +47,39 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
             .catch(err => console.error("Failed to log logout activity:", err));
         }
         setSession(null);
-        setUser(null);
+        setUser(null); // Explicitly clear user on SIGNED_OUT
         setLoading(false);
         if (toastId) dismissToast(toastId);
         showSuccess("Anda telah berhasil logout.");
       } else if (event === 'INITIAL_SESSION') {
         setSession(currentSession);
-        setUser(currentSession?.user || null);
+        // Only update user if currentSession has a user.
+        // If currentSession is null, but we already have a user, keep the existing user.
+        // Only set to null if currentSession is null AND there was no previous user.
+        if (currentSession?.user) {
+          setUser(currentSession.user);
+        } else if (!user) { // If no currentSession and no existing user, then set to null
+          setUser(null);
+        }
         setLoading(false);
         if (currentSession && location.pathname === '/login') {
           navigate('/');
         } else if (!currentSession && location.pathname !== '/login') {
           navigate('/login');
         }
-      } else if (event === 'MFA_CHALLENGE_VERIFIED') {
-        // Handle MFA challenge verified if needed
-      } else if (event === 'PASSWORD_RECOVERY') {
-        // Handle password recovery if needed
       } else if (event === 'TOKEN_REFRESHED') {
         setSession(currentSession);
-        setUser(currentSession?.user || null);
+        if (currentSession?.user) {
+          setUser(currentSession.user);
+        }
+        // If currentSession is null here, it means refresh failed, but we should still keep the user if it was there.
+        // This event usually means a successful refresh, so currentSession.user should be present.
       } else {
         setLoading(false);
       }
     });
 
+    // Initial session check
     supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
       if (error) {
         showError(error.message);
@@ -80,7 +88,12 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
         return;
       }
       setSession(initialSession);
-      setUser(initialSession?.user || null);
+      // Same logic as INITIAL_SESSION event
+      if (initialSession?.user) {
+        setUser(initialSession.user);
+      } else if (!user) { // If no initialSession and no existing user, then set to null
+        setUser(null);
+      }
       setLoading(false);
       if (initialSession && location.pathname === '/login') {
         navigate('/');
@@ -93,7 +106,7 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       subscription.unsubscribe();
       if (toastId) dismissToast(toastId);
     };
-  }, [navigate, queryClient]); // 'user' removed from dependencies
+  }, [navigate, queryClient, user]); // Added 'user' back to dependencies to ensure logActivity gets latest user.
 
   return (
     <SessionContext.Provider value={{ session, user, loading }}>

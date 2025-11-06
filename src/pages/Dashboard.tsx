@@ -129,13 +129,15 @@ const Dashboard = () => {
             <Book className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
-            {isLoadingClasses ? (
+            {isLoadingClasses && totalClasses === 0 ? ( // Show skeleton only if loading AND no data
               <Skeleton className="h-8 w-1/4" />
             ) : (
               <div className="text-3xl font-bold text-foreground">{totalClasses}</div>
             )}
             <p className="text-sm text-muted-foreground mt-1">
-              {totalClasses === 0 ? "Anda belum memiliki kelas." : `Anda memiliki ${totalClasses} kelas.`}
+              {isLoadingClasses && totalClasses === 0 ? <Skeleton className="h-4 w-1/2" /> : ( // Show skeleton only if loading AND no data
+                totalClasses === 0 ? "Anda belum memiliki kelas." : `Anda memiliki ${totalClasses} kelas.`
+              )}
             </p>
             <Button onClick={() => navigate('/classes')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
               <PlusCircle className="mr-2 h-4 w-4" /> Buat Kelas Baru
@@ -148,13 +150,15 @@ const Dashboard = () => {
             <Users className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
-            {isLoadingStudents || isLoadingUserClassIds ? (
+            {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? ( // Show skeleton only if loading AND no data
               <Skeleton className="h-8 w-1/4" />
             ) : (
               <div className="text-3xl font-bold text-foreground">{totalStudents}</div>
             )}
             <p className="text-sm text-muted-foreground mt-1">
-              {totalStudents === 0 ? "Belum ada siswa terdaftar." : `Anda memiliki ${totalStudents} siswa.`}
+              {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? <Skeleton className="h-4 w-1/2" /> : ( // Show skeleton only if loading AND no data
+                totalStudents === 0 ? "Belum ada siswa terdaftar." : `Anda memiliki ${totalStudents} siswa.`
+              )}
             </p>
             <Button onClick={() => navigate('/students')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
               <PlusCircle className="mr-2 h-4 w-4" /> Tambah Siswa
@@ -167,13 +171,15 @@ const Dashboard = () => {
             <ClipboardList className="h-5 w-5 text-dashboardAccent-DEFAULT" />
           </CardHeader>
           <CardContent>
-            {isLoadingAssessments || isLoadingUserClassIds ? (
+            {(isLoadingAssessments || isLoadingUserClassIds) && totalAssessments === 0 ? ( // Show skeleton only if loading AND no data
               <Skeleton className="h-8 w-1/4" />
             ) : (
               <div className="text-3xl font-bold text-foreground">{totalAssessments}</div>
             )}
             <p className="text-sm text-muted-foreground mt-1">
-              {totalAssessments === 0 ? "Tidak ada penilaian aktif." : `Anda memiliki ${totalAssessments} penilaian aktif.`}
+              {(isLoadingAssessments || isLoadingUserClassIds) && totalAssessments === 0 ? <Skeleton className="h-4 w-1/2" /> : ( // Show skeleton only if loading AND no data
+                totalAssessments === 0 ? "Tidak ada penilaian aktif." : `Anda memiliki ${totalAssessments} penilaian aktif.`
+              )}
             </p>
             <Button onClick={() => navigate('/assessments')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
               <PlusCircle className="mr-2 h-4 w-4" /> Buat Penilaian
@@ -188,7 +194,7 @@ const Dashboard = () => {
           <History className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {isLoadingActivities ? (
+          {isLoadingActivities && (!recentActivities || recentActivities.length === 0) ? ( // Show skeleton only if loading AND no data
             <div className="space-y-2">
               <Skeleton className="h-6 w-full rounded-lg" />
               <Skeleton className="h-6 w-full rounded-lg" />
