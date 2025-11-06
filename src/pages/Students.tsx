@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, Edit, Trash2, FileUp } from 'lucide-react';
+import { PlusCircle, Users, Edit, Trash2, FileUp, Filter, Loader2 } from 'lucide-react';
 import AddStudentDialog from '@/components/students/AddStudentDialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Import useQueryClient
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess } from '@/utils/toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import EditStudentDialog from '@/components/students/EditStudentDialog';
 import ImportStudentsDialog from '@/components/students/ImportStudentsDialog';
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { logActivity } from '@/utils/activityLogger';
 import {
   Pagination,
   PaginationContent,
@@ -32,6 +32,19 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+interface Kelas {
+  id: string;
+  nama_kelas: string;
+  tahun_semester: string;
+}
 
 interface Siswa {
   id: string;
@@ -51,23 +64,46 @@ const Students = () => {
   const [studentToEdit, setStudentToEdit] = useState<Siswa | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [studentToDeleteId, setStudentToDeleteId] = useState<string | null>(null);
-  const [studentToDeleteName, setStudentToDeleteName] = useState<string | null>(null); // State to store student name for logging
+  const [studentToDeleteName, setStudentToDeleteName] = useState<string | null>(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const queryClient = useQueryClient(); // Get queryClient here
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false); // State for bulk delete dialog
+  const [isDeletingAllStudents, setIsDeletingAllStudents] = useState(false); // State for bulk delete loading
+  const [selectedClassFilterId, setSelectedClassFilterId] = useState<string | null>(null); // State for class filter
+  const queryClient = useQueryClient();
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Number of items per page
   const [totalItems, setTotalItems] = useState(0);
 
+  // Fetch classes for the filter dropdown
+  const { data: classes, isLoading: isLoadingClasses, isError: isErrorClasses, error: classesError } = useQuery<Kelas[], Error>({
+    queryKey: ['classesForStudentFilter', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('kelas')
+        .select('id, nama_kelas, tahun_semester')
+        .eq('id_guru', user.id)
+        .order('nama_kelas', { ascending: true });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch students based on selected class filter and pagination
   const { data: students, isLoading, isError, error } = useQuery<Siswa[], Error>({
-    queryKey: ['students', user?.id, currentPage], // Add currentPage to queryKey
+    queryKey: ['students', user?.id, currentPage, selectedClassFilterId], // Add selectedClassFilterId to queryKey
     queryFn: async () => {
       if (!user) return [];
       const startIndex = (currentPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage - 1;
 
-      const { data, error, count } = await supabase
+      let query = supabase
         .from('siswa')
         .select(`
           id,
@@ -77,26 +113,54 @@ const Students = () => {
           id_kelas,
           kelas (nama_kelas)
         `, { count: 'exact' })
-        .eq('kelas.id_guru', user.id)
-        .order('created_at', { ascending: false })
-        .range(startIndex, endIndex); // Apply range for pagination
+        .order('created_at', { ascending: false });
+
+      if (selectedClassFilterId) {
+        query = query.eq('id_kelas', selectedClassFilterId);
+      } else {
+        // If no specific class is selected, ensure only students from user's classes are fetched
+        // First, get all class IDs for the current user
+        const { data: userClasses, error: userClassesError } = await supabase
+          .from('kelas')
+          .select('id')
+          .eq('id_guru', user.id);
+
+        if (userClassesError) throw new Error(userClassesError.message);
+        const userClassIds = userClasses?.map(c => c.id) || [];
+        
+        if (userClassIds.length > 0) {
+          query = query.in('id_kelas', userClassIds);
+        } else {
+          // If user has no classes, return empty to avoid fetching all students
+          setTotalItems(0);
+          return [];
+        }
+      }
+
+      const { data, error, count } = await query.range(startIndex, endIndex);
 
       if (error) {
         throw new Error(error.message);
       }
-      setTotalItems(count || 0); // Update total items for pagination
-      console.log("Fetched students data:", data); // Log data here
-      return data as Siswa[] || []; // Explicitly cast data to Siswa[]
+      setTotalItems(count || 0);
+      return data as Siswa[] || [];
     },
     enabled: !!user,
   });
 
+  const handleClassFilterChange = (classId: string) => {
+    setSelectedClassFilterId(classId === "all" ? null : classId);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   const handleStudentAdded = () => {
     queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['totalStudents', user?.id] });
   };
 
   const handleStudentImported = () => {
     queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['totalStudents', user?.id] });
   };
 
   const handleEditClick = (student: Siswa) => {
@@ -110,7 +174,7 @@ const Students = () => {
 
   const handleDeleteClick = (studentId: string, studentName: string) => {
     setStudentToDeleteId(studentId);
-    setStudentToDeleteName(studentName); // Store student name
+    setStudentToDeleteName(studentName);
     setIsDeleteDialogOpen(true);
   };
 
@@ -126,7 +190,6 @@ const Students = () => {
       showError("Gagal menghapus siswa: " + error.message);
     } else {
       showSuccess("Siswa berhasil dihapus!");
-      // Log activity, passing queryClient
       await logActivity(user, 'STUDENT_DELETED', `Menghapus siswa: ${studentToDeleteName}`, queryClient);
       queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] });
@@ -136,8 +199,55 @@ const Students = () => {
     setStudentToDeleteName(null);
   };
 
+  const handleBulkDeleteStudents = async () => {
+    if (!user) {
+      showError("Anda harus login untuk menghapus siswa.");
+      return;
+    }
+
+    setIsDeletingAllStudents(true);
+    try {
+      // First, get all class IDs for the current user
+      const { data: userClasses, error: userClassesError } = await supabase
+        .from('kelas')
+        .select('id')
+        .eq('id_guru', user.id);
+
+      if (userClassesError) throw new Error(userClassesError.message);
+      const userClassIds = userClasses?.map(c => c.id) || [];
+
+      if (userClassIds.length === 0) {
+        showError("Tidak ada kelas yang ditemukan untuk pengguna ini, tidak ada siswa yang dihapus.");
+        return;
+      }
+
+      // Then, delete all students belonging to these classes
+      const { error: deleteError } = await supabase
+        .from('siswa')
+        .delete()
+        .in('id_kelas', userClassIds);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      showSuccess("Semua siswa berhasil dihapus!");
+      await logActivity(user, 'STUDENT_DELETED', `Menghapus semua siswa dari semua kelas yang diajar.`, queryClient);
+      queryClient.invalidateQueries({ queryKey: ['students', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['totalStudents', user.id] });
+    } catch (error: any) {
+      showError("Gagal menghapus semua siswa: " + error.message);
+    } finally {
+      setIsDeletingAllStudents(false);
+      setIsBulkDeleteDialogOpen(false);
+    }
+  };
+
   if (isError) {
     showError("Gagal memuat siswa: " + error?.message);
+  }
+  if (isErrorClasses) {
+    showError("Gagal memuat kelas untuk filter: " + classesError?.message);
   }
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -165,9 +275,39 @@ const Students = () => {
             >
               <PlusCircle className="mr-2 h-4 w-4" /> Tambah Siswa Baru
             </Button>
+            <Button
+              onClick={() => setIsBulkDeleteDialogOpen(true)}
+              className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-mac-sm"
+              disabled={isLoading || isDeletingAllStudents}
+            >
+              {isDeletingAllStudents ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />} Hapus Semua Siswa
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Select onValueChange={handleClassFilterChange} value={selectedClassFilterId || "all"}>
+              <SelectTrigger className="w-[200px] rounded-lg">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter berdasarkan Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kelas</SelectItem>
+                {isLoadingClasses ? (
+                  <SelectItem value="loading" disabled>Memuat kelas...</SelectItem>
+                ) : classes && classes.length > 0 ? (
+                  classes.map((kelas) => (
+                    <SelectItem key={kelas.id} value={kelas.id}>
+                      {kelas.nama_kelas}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-classes" disabled>Tidak ada kelas tersedia</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
           {isLoading ? (
             <div className="space-y-2">
               <Skeleton className="h-10 w-full rounded-lg" />
@@ -288,6 +428,29 @@ const Students = () => {
               className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+        <AlertDialogContent className="rounded-xl shadow-mac-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin ingin menghapus SEMUA siswa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus semua siswa yang terdaftar di semua kelas Anda secara permanen.
+              Semua data nilai dan kehadiran yang terkait dengan siswa-siswa ini juga akan dihapus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-lg">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDeleteStudents}
+              className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingAllStudents}
+            >
+              {isDeletingAllStudents ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Hapus Semua"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
