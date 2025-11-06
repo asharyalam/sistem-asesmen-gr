@@ -26,6 +26,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useNavigate } from 'react-router-dom';
 import { logActivity } from '@/utils/activityLogger';
 import ScoreExportTool from '@/components/admin/ScoreExportTool'; // Import ScoreExportTool
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Penilaian {
   id: string;
@@ -57,11 +65,19 @@ const Assessments = () => {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false); // State for export dialog
   const queryClient = useQueryClient();
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of items per page
+  const [totalItems, setTotalItems] = useState(0);
+
   const { data: assessments, isLoading, isError, error } = useQuery<Penilaian[], Error>({
-    queryKey: ['assessments', user?.id],
+    queryKey: ['assessments', user?.id, currentPage], // Add currentPage to queryKey
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage - 1;
+
+      const { data, error, count } = await supabase
         .from('penilaian')
         .select(`
           id,
@@ -75,13 +91,15 @@ const Assessments = () => {
           id_kategori_bobot_akhir,
           kategori_bobot (nama_kategori),
           created_at
-        `)
+        `, { count: 'exact' })
         .eq('kelas.id_guru', user.id)
-        .order('tanggal', { ascending: false });
+        .order('tanggal', { ascending: false })
+        .range(startIndex, endIndex); // Apply range for pagination
 
       if (error) {
         throw new Error(error.message);
       }
+      setTotalItems(count || 0); // Update total items for pagination
       return data || [];
     },
     enabled: !!user,
@@ -130,6 +148,8 @@ const Assessments = () => {
     showError("Gagal memuat penilaian: " + error?.message);
   }
 
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
   return (
     <div className="flex-1 space-y-8 p-4">
       <h1 className="text-4xl font-extrabold text-assessmentsAccent-DEFAULT">Manajemen Penilaian</h1>
@@ -175,51 +195,81 @@ const Assessments = () => {
               <Skeleton className="h-10 w-full rounded-lg" />
             </div>
           ) : assessments && assessments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama Penilaian</TableHead>
-                  <TableHead>Kelas</TableHead>
-                  <TableHead>Tanggal</TableHead>
-                  <TableHead>Jenis</TableHead>
-                  <TableHead>Bentuk</TableHead>
-                  <TableHead>Kode TP</TableHead>
-                  <TableHead>Kategori Bobot</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assessments.map((assessment) => (
-                  <TableRow key={assessment.id}>
-                    <TableCell className="font-medium">{assessment.nama_penilaian}</TableCell>
-                    <TableCell>{assessment.kelas?.nama_kelas || 'N/A'}</TableCell>
-                    <TableCell>{new Date(assessment.tanggal).toLocaleDateString()}</TableCell>
-                    <TableCell>{assessment.jenis_penilaian}</TableCell>
-                    <TableCell>{assessment.bentuk_penilaian}</TableCell>
-                    <TableCell>{assessment.kode_tp || '-'}</TableCell>
-                    <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:bg-primary/10"
-                        onClick={() => handleEditClick(assessment)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(assessment.id, assessment.nama_penilaian)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" /> Hapus
-                      </Button>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama Penilaian</TableHead>
+                    <TableHead>Kelas</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Jenis</TableHead>
+                    <TableHead>Bentuk</TableHead>
+                    <TableHead>Kode TP</TableHead>
+                    <TableHead>Kategori Bobot</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {assessments.map((assessment) => (
+                    <TableRow key={assessment.id}>
+                      <TableCell className="font-medium">{assessment.nama_penilaian}</TableCell>
+                      <TableCell>{assessment.kelas?.nama_kelas || 'N/A'}</TableCell>
+                      <TableCell>{new Date(assessment.tanggal).toLocaleDateString()}</TableCell>
+                      <TableCell>{assessment.jenis_penilaian}</TableCell>
+                      <TableCell>{assessment.bentuk_penilaian}</TableCell>
+                      <TableCell>{assessment.kode_tp || '-'}</TableCell>
+                      <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary hover:bg-primary/10"
+                          onClick={() => handleEditClick(assessment)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteClick(assessment.id, assessment.nama_penilaian)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Hapus
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {totalPages > 1 && (
+                <Pagination className="mt-4">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
           ) : (
             <p className="text-muted-foreground">Belum ada penilaian yang dibuat.</p>
           )}
