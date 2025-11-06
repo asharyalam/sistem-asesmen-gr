@@ -24,6 +24,14 @@ import {
 import EditStudentDialog from '@/components/students/EditStudentDialog';
 import ImportStudentsDialog from '@/components/students/ImportStudentsDialog';
 import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Siswa {
   id: string;
@@ -47,11 +55,19 @@ const Students = () => {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const queryClient = useQueryClient(); // Get queryClient here
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of items per page
+  const [totalItems, setTotalItems] = useState(0);
+
   const { data: students, isLoading, isError, error } = useQuery<Siswa[], Error>({
-    queryKey: ['students', user?.id],
+    queryKey: ['students', user?.id, currentPage], // Add currentPage to queryKey
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage - 1;
+
+      const { data, error, count } = await supabase
         .from('siswa')
         .select(`
           id,
@@ -60,13 +76,15 @@ const Students = () => {
           created_at,
           id_kelas,
           kelas (nama_kelas)
-        `)
+        `, { count: 'exact' })
         .eq('kelas.id_guru', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(startIndex, endIndex); // Apply range for pagination
 
       if (error) {
         throw new Error(error.message);
       }
+      setTotalItems(count || 0); // Update total items for pagination
       return data || [];
     },
     enabled: !!user,
@@ -121,6 +139,8 @@ const Students = () => {
     showError("Gagal memuat siswa: " + error?.message);
   }
 
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
   return (
     <div className="flex-1 space-y-8 p-4">
       <h1 className="text-4xl font-extrabold text-studentsAccent-DEFAULT">Manajemen Siswa</h1>
@@ -154,45 +174,75 @@ const Students = () => {
               <Skeleton className="h-10 w-full rounded-lg" />
             </div>
           ) : students && students.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama Siswa</TableHead>
-                  <TableHead>NIS/NISN</TableHead>
-                  <TableHead>Kelas</TableHead>
-                  <TableHead>Dibuat Pada</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.nama_siswa}</TableCell>
-                    <TableCell>{student.nis_nisn}</TableCell>
-                    <TableCell>{student.kelas?.nama_kelas || 'N/A'}</TableCell>
-                    <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:bg-primary/10"
-                        onClick={() => handleEditClick(student)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(student.id, student.nama_siswa)} // Pass student name
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" /> Hapus
-                      </Button>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama Siswa</TableHead>
+                    <TableHead>NIS/NISN</TableHead>
+                    <TableHead>Kelas</TableHead>
+                    <TableHead>Dibuat Pada</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {students.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell className="font-medium">{student.nama_siswa}</TableCell>
+                      <TableCell>{student.nis_nisn}</TableCell>
+                      <TableCell>{student.kelas?.nama_kelas || 'N/A'}</TableCell>
+                      <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary hover:bg-primary/10"
+                          onClick={() => handleEditClick(student)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteClick(student.id, student.nama_siswa)} // Pass student name
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Hapus
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {totalPages > 1 && (
+                <Pagination className="mt-4">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
           ) : (
             <p className="text-muted-foreground">Belum ada siswa yang terdaftar.</p>
           )}
