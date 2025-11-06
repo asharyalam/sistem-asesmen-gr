@@ -37,14 +37,14 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
       if (!selectedClassId) return [];
       const { data, error } = await supabase
         .from('siswa')
-        .select('id, nama_siswa, nis_nisn')
+        .select('id, nama_siswa, nis_nisn, id_kelas, kelas (nama_kelas)')
         .eq('id_kelas', selectedClassId)
         .order('nama_siswa', { ascending: true });
 
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as Siswa[] || [];
     },
     enabled: !!selectedClassId,
   });
@@ -110,10 +110,10 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
   const classPerformanceSummary = useMemo(() => {
     if (!allScores || allScores.length === 0 || !students || students.length === 0) return null;
 
-    const totalAverage = calculateClassAverage(allScores, students);
+    const totalAverage = calculateClassAverage(allScores, students as Siswa[]);
 
     const studentAverages: { studentId: string; average: number; nama_siswa: string }[] = [];
-    students.forEach(student => {
+    (students as Siswa[]).forEach(student => {
       const studentScores = allScores.filter(s => s.id_siswa === student.id);
       const studentAvg = calculateClassAverage(studentScores, [student]);
       studentAverages.push({ studentId: student.id, average: studentAvg, nama_siswa: student.nama_siswa });

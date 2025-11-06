@@ -4,8 +4,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, Legend } from 'recharts';
-import { GitCompareArrows } => 'lucide-react';
-import { Skeleton } '@/components/ui/skeleton';
+import { GitCompareArrows } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Kelas, Siswa, NilaiAspekSiswa } from '@/types/analysis';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,11 +38,11 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
       if (!selectedComparisonClassId1) return [];
       const { data, error } = await supabase
         .from('siswa')
-        .select('id, nama_siswa, nis_nisn')
+        .select('id, nama_siswa, nis_nisn, id_kelas, kelas (nama_kelas)')
         .eq('id_kelas', selectedComparisonClassId1)
         .order('nama_siswa', { ascending: true });
       if (error) throw new Error(error.message);
-      return data || [];
+      return data as Siswa[] || [];
     },
     enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
   });
@@ -54,11 +54,11 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
       if (!selectedComparisonClassId2) return [];
       const { data, error } = await supabase
         .from('siswa')
-        .select('id, nama_siswa, nis_nisn')
+        .select('id, nama_siswa, nis_nisn, id_kelas, kelas (nama_kelas)')
         .eq('id_kelas', selectedComparisonClassId2)
         .order('nama_siswa', { ascending: true });
       if (error) throw new Error(error.message);
-      return data || [];
+      return data as Siswa[] || [];
     },
     enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
   });
@@ -75,6 +75,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
           skor_diperoleh,
           aspek_penilaian (
             id,
+            deskripsi,
             skor_maksimal,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
@@ -82,7 +83,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         `)
         .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId1);
       if (error) throw new Error(error.message);
-      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
+      return data as NilaiAspekSiswa[] || [];
     },
     enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
   });
@@ -99,6 +100,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
           skor_diperoleh,
           aspek_penilaian (
             id,
+            deskripsi,
             skor_maksimal,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
@@ -106,7 +108,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         `)
         .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId2);
       if (error) throw new Error(error.message);
-      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
+      return data as NilaiAspekSiswa[] || [];
     },
     enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
   });
@@ -121,8 +123,8 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
   const comparativeAnalysisData = useMemo(() => {
     if (!comparisonScores1 || !comparisonScores2 || !classes || !studentsClass1 || !studentsClass2) return [];
 
-    const avg1 = calculateClassAverage(comparisonScores1, studentsClass1);
-    const avg2 = calculateClassAverage(comparisonScores2, studentsClass2);
+    const avg1 = calculateClassAverage(comparisonScores1, studentsClass1 as Siswa[]);
+    const avg2 = calculateClassAverage(comparisonScores2, studentsClass2 as Siswa[]);
 
     const className1 = classes.find(c => c.id === selectedComparisonClassId1)?.nama_kelas || 'Kelas 1';
     const className2 = classes.find(c => c.id === selectedComparisonClassId2)?.nama_kelas || 'Kelas 2';

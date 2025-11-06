@@ -60,13 +60,7 @@ const Login = () => {
           }}
           theme="light"
           redirectTo={window.location.origin + '/'}
-          i18n={{
-            en: {
-              sign_in: {
-                email_sign_in_password_mismatch: 'Email dan password salah',
-              },
-            },
-          }}
+          // Removed i18n prop as it's not directly supported by Auth component
         />
       </div>
       <MadeWithDyad />

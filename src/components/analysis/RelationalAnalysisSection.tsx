@@ -42,6 +42,8 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
           tanggal,
           jenis_penilaian,
           bentuk_penilaian,
+          kode_tp,
+          id_kategori_bobot_akhir,
           id_kelas,
           kelas (id_guru)
         `)
