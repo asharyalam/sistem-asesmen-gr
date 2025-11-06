@@ -15,11 +15,20 @@ import ScoreInput from "./pages/ScoreInput";
 import AttendanceInput from "./pages/AttendanceInput";
 import AttendanceReport from "./pages/AttendanceReport";
 import StatisticalAnalysis from "./pages/StatisticalAnalysis";
-import Profile from "./pages/Profile"; // Import the new Profile page
+import Profile from "./pages/Profile";
 import { SessionContextProvider } from "./components/auth/SessionContextProvider";
 import AuthLayout from "./components/layout/AuthLayout";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // Data dianggap 'stale' setelah 5 menit, akan refetch di latar belakang
+      cacheTime: 1000 * 60 * 10, // Data akan tetap di cache selama 10 menit
+      refetchOnWindowFocus: true, // Tetap refetch saat jendela fokus
+      retry: 2, // Coba ulang query yang gagal sebanyak 2 kali
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -40,7 +49,7 @@ const App = () => (
             <Route path="/attendance/report" element={<AuthLayout><AttendanceReport /></AuthLayout>} />
             <Route path="/weight-settings" element={<AuthLayout><WeightSettings /></AuthLayout>} />
             <Route path="/statistical-analysis" element={<AuthLayout><StatisticalAnalysis /></AuthLayout>} />
-            <Route path="/profile" element={<AuthLayout><Profile /></AuthLayout>} /> {/* New Profile Route */}
+            <Route path="/profile" element={<AuthLayout><Profile /></AuthLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             {/* Protected routes will go inside AuthLayout */}
             <Route path="*" element={<NotFound />} />
