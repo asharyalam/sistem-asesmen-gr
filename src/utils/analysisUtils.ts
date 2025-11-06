@@ -18,20 +18,22 @@ export const calculateClassAverage = (scores: NilaiAspekSiswa[], studentsInClass
     if (!acc[score.id_siswa]) {
       acc[score.id_siswa] = {};
     }
-    // Mengakses penilaian melalui aspek_penilaian, tambahkan pemeriksaan null
-    if (!score.aspek_penilaian || !score.aspek_penilaian.penilaian) {
-      return acc; // Lewati skor ini jika aspek_penilaian atau penilaian bersarangnya null
+    // Mengakses penilaian melalui aspek_penilaian, tambahkan pemeriksaan null dan akses elemen pertama
+    if (!score.aspek_penilaian || score.aspek_penilaian.length === 0 || !score.aspek_penilaian[0]?.penilaian || score.aspek_penilaian[0].penilaian.length === 0) {
+      return acc; // Lewati skor ini jika aspek_penilaian atau penilaian bersarangnya null/kosong
     }
-    const assessmentId = score.aspek_penilaian.penilaian.id;
+    const assessmentId = score.aspek_penilaian[0].penilaian[0].id;
     if (!acc[score.id_siswa][assessmentId]) {
       acc[score.id_siswa][assessmentId] = { studentScore: 0, maxScore: 0 };
     }
     acc[score.id_siswa][assessmentId].studentScore += score.skor_diperoleh;
-    acc[score.id_siswa][assessmentId].maxScore += score.aspek_penilaian.skor_maksimal;
+    acc[score.id_siswa][assessmentId].maxScore += score.aspek_penilaian[0].skor_maksimal;
     return acc;
   }, {} as { [studentId: string]: { [assessmentId: string]: { studentScore: number; maxScore: number } } });
 
-  // Calculate average percentage for each student
+  let totalClassAverage = 0;
+  let studentsWithScoresCount = 0;
+
   for (const studentId in scoresGroupedByStudentAndAssessment) {
     const assessmentsForStudent = scoresGroupedByStudentAndAssessment[studentId];
     let totalStudentAssessmentPercentage = 0;
@@ -48,9 +50,6 @@ export const calculateClassAverage = (scores: NilaiAspekSiswa[], studentsInClass
       studentOverallPercentages[studentId].push(totalStudentAssessmentPercentage / assessmentCount);
     }
   }
-
-  let totalClassAverage = 0;
-  let studentsWithScoresCount = 0;
 
   for (const studentId in studentOverallPercentages) {
     const percentages = studentOverallPercentages[studentId];
