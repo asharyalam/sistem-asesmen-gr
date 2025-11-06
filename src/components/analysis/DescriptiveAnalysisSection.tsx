@@ -61,6 +61,7 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
           id_aspek,
           skor_diperoleh,
           aspek_penilaian (
+            id,
             deskripsi,
             skor_maksimal,
             urutan,
@@ -73,7 +74,7 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
     },
     enabled: !!selectedClassId,
   });

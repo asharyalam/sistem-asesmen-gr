@@ -186,7 +186,7 @@ const WeightSettings = () => {
     activeCategoryIds.forEach(categoryId => {
       const bobotValue = values[`bobot_${categoryId}`];
       if (typeof bobotValue === 'number' && bobotValue >= 0 && bobotValue <= 100) {
-        const existingSetting = weightSettings?.find(ws => ws.id_kategori_bobot === category.id);
+        const existingSetting = weightSettings?.find(ws => ws.id_kategori_bobot === categoryId); // Fixed: use categoryId
         const recordToUpsert: Partial<PengaturanBobotKelas> = {
           id_kelas: selectedClassId,
           id_kategori_bobot: categoryId,

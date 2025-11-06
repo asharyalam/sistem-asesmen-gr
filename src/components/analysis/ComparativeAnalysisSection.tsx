@@ -71,8 +71,10 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         .from('nilai_aspek_siswa')
         .select(`
           id_siswa,
+          id_aspek,
           skor_diperoleh,
           aspek_penilaian (
+            id,
             skor_maksimal,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
@@ -80,7 +82,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         `)
         .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId1);
       if (error) throw new Error(error.message);
-      return data || [];
+      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
     },
     enabled: !!selectedComparisonClassId1 && activeTab === 'comparative',
   });
@@ -93,8 +95,10 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         .from('nilai_aspek_siswa')
         .select(`
           id_siswa,
+          id_aspek,
           skor_diperoleh,
           aspek_penilaian (
+            id,
             skor_maksimal,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
@@ -102,7 +106,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
         `)
         .eq('aspek_penilaian.penilaian.id_kelas', selectedComparisonClassId2);
       if (error) throw new Error(error.message);
-      return data || [];
+      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
     },
     enabled: !!selectedComparisonClassId2 && activeTab === 'comparative',
   });

@@ -85,7 +85,7 @@ const Students = () => {
         throw new Error(error.message);
       }
       setTotalItems(count || 0); // Update total items for pagination
-      return data || [];
+      return data as Siswa[] || []; // Explicitly cast data to Siswa[]
     },
     enabled: !!user,
   });
@@ -220,7 +220,8 @@ const Students = () => {
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        disabled={currentPage === 1}
+                        aria-disabled={currentPage === 1}
+                        tabIndex={currentPage === 1 ? -1 : undefined}
                       />
                     </PaginationItem>
                     {Array.from({ length: totalPages }, (_, i) => (
@@ -236,7 +237,8 @@ const Students = () => {
                     <PaginationItem>
                       <PaginationNext
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        disabled={currentPage === totalPages}
+                        aria-disabled={currentPage === totalPages}
+                        tabIndex={currentPage === totalPages ? -1 : undefined}
                       />
                     </PaginationItem>
                   </PaginationContent>

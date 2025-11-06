@@ -53,7 +53,6 @@ const Login = () => {
                 },
                 radii: {
                   borderRadiusButton: 'var(--radius)',
-                  button: 'var(--radius)',
                   input: 'var(--radius)',
                 },
               },

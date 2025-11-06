@@ -78,10 +78,13 @@ const ScoreInput = () => {
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as Penilaian[] || []; // Explicitly cast data to Penilaian[]
     },
     enabled: !!user,
   });
+
+  // Get the class ID from the selected assessment
+  const selectedClassId = assessments?.find(a => a.id === selectedAssessmentId)?.id_kelas;
 
   // Fetch aspects for the selected assessment
   const { data: aspects, isLoading: isLoadingAspects, isError: isErrorAspects, error: aspectsError } = useQuery<AspekPenilaian[], Error>({
@@ -101,9 +104,6 @@ const ScoreInput = () => {
     },
     enabled: !!selectedAssessmentId,
   });
-
-  // Get the class ID from the selected assessment
-  const selectedClassId = assessments?.find(a => a.id === selectedAssessmentId)?.id_kelas;
 
   // Fetch students for the selected class
   const { data: students, isLoading: isLoadingStudents, isError: isErrorStudents, error: studentsError } = useQuery<Siswa[], Error>({

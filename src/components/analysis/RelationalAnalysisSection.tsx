@@ -39,6 +39,9 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
         .select(`
           id,
           nama_penilaian,
+          tanggal,
+          jenis_penilaian,
+          bentuk_penilaian,
           id_kelas,
           kelas (id_guru)
         `)
@@ -48,7 +51,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as Penilaian[] || []; // Explicitly cast data to Penilaian[]
     },
     enabled: !!user && activeTab === 'relational',
   });
@@ -60,14 +63,14 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (!selectedRelationAssessmentId) return [];
       const { data, error } = await supabase
         .from('aspek_penilaian')
-        .select('id, deskripsi, skor_maksimal, id_penilaian')
+        .select('id, deskripsi, skor_maksimal, urutan, id_penilaian') // Include 'urutan' to match AspekPenilaian interface
         .eq('id_penilaian', selectedRelationAssessmentId)
         .order('urutan', { ascending: true });
 
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as AspekPenilaian[] || []; // Explicitly cast data to AspekPenilaian[]
     },
     enabled: !!selectedRelationAssessmentId && activeTab === 'relational',
   });
@@ -84,7 +87,14 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
           id_siswa,
           id_aspek,
           skor_diperoleh,
-          aspek_penilaian (deskripsi, skor_maksimal, id_penilaian)
+          aspek_penilaian (
+            id,
+            deskripsi,
+            skor_maksimal,
+            urutan,
+            id_penilaian,
+            penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
+          )
         `)
         .in('id_aspek', [selectedRelationAspectId1, selectedRelationAspectId2])
         .eq('aspek_penilaian.id_penilaian', selectedRelationAssessmentId);
@@ -92,7 +102,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data || [];
+      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
     },
     enabled: !!selectedRelationAssessmentId && !!selectedRelationAspectId1 && !!selectedRelationAspectId2 && activeTab === 'relational',
   });
