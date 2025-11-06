@@ -130,7 +130,7 @@ const Dashboard = () => {
             {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? (
               <Skeleton className="h-10 w-1/2" />
             ) : (
-              <div className="text-4xl font-bold text-foreground">{totalStudents}</div> {/* Larger number */}
+              <div className="text-4xl font-bold text-foreground">{totalStudents}</div> /* Larger number */
             )}
             <p className="text-sm text-green-600 mt-2">
               {/* Placeholder for percentage change */}
