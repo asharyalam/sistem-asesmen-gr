@@ -100,6 +100,7 @@ const Assessments = () => {
         throw new Error(error.message);
       }
       setTotalItems(count || 0); // Update total items for pagination
+      console.log("Fetched assessments data:", data); // Log data here
       return data as Penilaian[] || []; // Explicitly cast data to Penilaian[]
     },
     enabled: !!user,
@@ -199,7 +200,7 @@ const Assessments = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nama Penilaian</TableHead> {/* Corrected header */}
+                    <TableHead>Nama Penilaian</TableHead>
                     <TableHead>Kelas</TableHead>
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Jenis</TableHead>
@@ -212,8 +213,8 @@ const Assessments = () => {
                 <TableBody>
                   {assessments.map((assessment) => (
                     <TableRow key={assessment.id}>
-                      <TableCell className="font-medium">{assessment.nama_penilaian}</TableCell> {/* Corrected: Display Nama Penilaian */}
-                      <TableCell>{assessment.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell> {/* Corrected: Display Kelas */}
+                      <TableCell className="font-medium">{assessment.nama_penilaian}</TableCell>
+                      <TableCell>{assessment.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell>
                       <TableCell>{new Date(assessment.tanggal).toLocaleDateString()}</TableCell>
                       <TableCell>{assessment.jenis_penilaian}</TableCell>
                       <TableCell>{assessment.bentuk_penilaian}</TableCell>

@@ -85,6 +85,7 @@ const Students = () => {
         throw new Error(error.message);
       }
       setTotalItems(count || 0); // Update total items for pagination
+      console.log("Fetched students data:", data); // Log data here
       return data as Siswa[] || []; // Explicitly cast data to Siswa[]
     },
     enabled: !!user,
@@ -189,9 +190,9 @@ const Students = () => {
                   {students.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell className="font-medium">{student.nama_siswa}</TableCell>
-                      <TableCell>{student.nis_nisn}</TableCell> {/* NIS/NISN */}
-                      <TableCell>{student.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell> {/* Nama Kelas */}
-                      <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell> {/* Dibuat Pada */}
+                      <TableCell>{student.nis_nisn}</TableCell>
+                      <TableCell>{student.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell>
+                      <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -205,7 +206,7 @@ const Students = () => {
                           variant="ghost"
                           size="sm"
                           className="text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDeleteClick(student.id, student.nama_siswa)} // Pass student name
+                          onClick={() => handleDeleteClick(student.id, student.nama_siswa)}
                         >
                           <Trash2 className="h-4 w-4 mr-1" /> Hapus
                         </Button>
