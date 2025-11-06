@@ -54,6 +54,7 @@ const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onC
       if (error) {
         throw new Error(error.message);
       }
+      console.log("Available classes for import:", data); // DEBUG: Log available classes
       return data || [];
     },
     enabled: !!user && isOpen,
@@ -118,6 +119,7 @@ const ImportStudentsDialog: React.FC<ImportStudentsDialogProps> = ({ isOpen, onC
 
     setIsImporting(true);
     const studentsToInsert = parsedData.map(student => {
+      console.log(`Attempting to match Excel class name "${student.nama_kelas}"`); // DEBUG: Log class name from Excel
       const classId = classes.find(c => c.nama_kelas.toLowerCase() === student.nama_kelas.toLowerCase())?.id;
       if (!classId) {
         showError(`Kelas "${student.nama_kelas}" untuk siswa "${student.nama_siswa}" tidak ditemukan. Siswa ini akan dilewati.`);

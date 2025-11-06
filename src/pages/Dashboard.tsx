@@ -98,11 +98,13 @@ const Dashboard = () => {
     if (isErrorActivities) console.error("Error fetching recent activities:", activitiesError); // Added this line
   }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError, isErrorActivities, activitiesError]); // Updated dependencies
 
+  const userFirstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'Pengguna';
+
   return (
     <div className="flex-1 space-y-8">
       <div className="flex items-baseline justify-between mb-6">
         <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome, System!</p>
+        <p className="text-sm text-muted-foreground">Welcome, {userFirstName}!</p>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2"> {/* Adjusted grid columns */}
