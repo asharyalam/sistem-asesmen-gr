@@ -144,7 +144,7 @@ const Dashboard = () => {
           <History className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {isLoadingActivities && (!recentActivities || recentActivities.length === 0) ? (
+          {isLoadingActivities ? (
             <div className="space-y-2">
               <Skeleton className="h-6 w-full rounded-lg" />
               <Skeleton className="h-6 w-full rounded-lg" />

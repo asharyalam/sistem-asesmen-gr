@@ -25,7 +25,7 @@ interface Penilaian {
   id_kelas: string;
   kelas: {
     nama_kelas: string;
-  };
+  } | null; // Updated type
 }
 
 interface AspekPenilaian {

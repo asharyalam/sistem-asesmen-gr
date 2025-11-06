@@ -40,7 +40,7 @@ interface Siswa {
   id_kelas: string;
   kelas: {
     nama_kelas: string;
-  };
+  } | null; // Updated type
   created_at: string;
 }
 
