@@ -64,7 +64,7 @@ export default {
         },
         // Custom accent colors for each page - MADE MORE VIBRANT AND DARKER
         dashboardAccent: {
-          DEFAULT: "hsl(210 70% 50%)", // Blueish
+          DEFAULT: "hsl(200 100% 40%)", // Blueish, matching new primary
           foreground: "hsl(210 40% 98%)",
         },
         classesAccent: {
@@ -87,14 +87,13 @@ export default {
           DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink
           foreground: "hsl(0 0% 100%)", // White text
         },
-        // adminAccent removed
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "1rem", // Added for larger rounded corners
-        "2xl": "1.5rem", // Added for even larger rounded corners
+        xl: "1.25rem", // Adjusted for larger rounded corners
+        "2xl": "1.75rem", // Adjusted for even larger rounded corners
       },
       boxShadow: {
         "mac-sm": "0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)",

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Sidebar from './Sidebar';
+import Header from './Header'; // Import the new Header component
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
@@ -31,10 +32,13 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 flex flex-col p-6">
-        {children}
+      <div className="flex-1 flex flex-col p-6"> {/* Adjusted padding for main content */}
+        <Header /> {/* Render the new Header component */}
+        <main className="flex-1">
+          {children}
+        </main>
         <MadeWithDyad />
-      </main>
+      </div>
     </div>
   );
 };

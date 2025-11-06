@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 210 20% 96%; /* Light, subtle grey-blue for main background */
+    --background: 200 60% 96%; /* Very light blueish grey for main background */
     --foreground: 222.2 84% 4.9%; /* Dark text */
 
     --card: 0 0% 100%; /* White card background */
@@ -13,8 +13,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 217.2 91.2% 59.8%; /* Vibrant blue accent */
-    --primary-foreground: 210 40% 98%; /* White text on primary */
+    --primary: 200 100% 40%; /* Vibrant blue accent */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
     --secondary: 210 40% 96.1%; /* Lighter grey for secondary elements */
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -28,20 +28,20 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217.2 91.2% 59.8%; /* Ring color matches primary accent */
+    --border: 210 20% 90%; /* Light grey border */
+    --input: 210 20% 90%;
+    --ring: 200 100% 40%; /* Ring color matches primary accent */
 
-    --radius: 0.75rem; /* Slightly larger border radius for softer look */
+    --radius: 1rem; /* Larger border radius for softer look */
 
-    --sidebar-background: 210 20% 98%; /* Very light grey for sidebar */
-    --sidebar-foreground: 222.2 47.4% 11.2%; /* Dark text for sidebar */
-    --sidebar-primary: 217.2 91.2% 59.8%; /* Primary accent for active sidebar items */
-    --sidebar-primary-foreground: 0 0% 100%; /* White text on active sidebar items */
-    --sidebar-accent: 210 40% 94%; /* Lighter accent for sidebar hover */
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 200 100% 35%; /* Deep, vibrant blue for sidebar */
+    --sidebar-foreground: 0 0% 100%; /* White text for sidebar */
+    --sidebar-primary: 0 0% 100%; /* White for active sidebar items */
+    --sidebar-primary-foreground: 200 100% 35%; /* Blue text on active sidebar items */
+    --sidebar-accent: 200 100% 45%; /* Slightly lighter blue for sidebar hover */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 200 100% 30%; /* Darker blue border for sidebar */
+    --sidebar-ring: 200 100% 40%;
   }
 
   .dark {

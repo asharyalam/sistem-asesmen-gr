@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, User } from "lucide-react"; // Import User icon
+import { Home, Book, ClipboardList, Settings, LogOut, TrendingUp, User, Bell, CalendarDays, Library, LifeBuoy, RefreshCcw } from "lucide-react"; // Import User icon
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,9 +35,38 @@ const Sidebar = () => {
       path: "/statistical-analysis",
     },
     {
-      name: "Profil", // New Profile link
+      name: "Profil",
       icon: User,
       path: "/profile",
+    },
+    // Additional items from the image, using placeholders for now
+    {
+      name: "Laporan",
+      icon: Bell, // Using Bell as a placeholder for Reports icon
+      path: "/reports", // Placeholder path
+    },
+    {
+      name: "Kalender",
+      icon: CalendarDays,
+      path: "/calendar", // Placeholder path
+    },
+    {
+      name: "Perpustakaan Saya",
+      icon: Library,
+      path: "/my-library", // Placeholder path
+    },
+  ];
+
+  const bottomNavItems = [
+    {
+      name: "Dukungan",
+      icon: LifeBuoy,
+      path: "/support", // Placeholder path
+    },
+    {
+      name: "Pembaruan",
+      icon: RefreshCcw,
+      path: "/updates", // Placeholder path
     },
   ];
 
@@ -53,13 +82,11 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="group flex flex-col h-full bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 transition-all duration-300 ease-in-out w-16 hover:w-64 shadow-mac-md relative z-50">
-      <div className="flex items-center justify-center h-16 border-b border-sidebar-border mb-6">
-        <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    <aside className="flex flex-col h-full w-64 bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border p-4 shadow-mac-md relative z-50">
+      <div className="flex items-center h-16 border-b border-sidebar-border mb-6 px-2">
+        <img src="/placeholder.svg" alt="Kidzee Logo" className="h-8 w-8 mr-2" /> {/* Placeholder for logo */}
+        <span className="text-xl font-bold text-white whitespace-nowrap">
           Aplikasi Guru
-        </span>
-        <span className="text-xl font-bold text-primary whitespace-nowrap overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 absolute">
-          AG
         </span>
       </div>
       <nav className="flex-1 space-y-2">
@@ -68,27 +95,44 @@ const Sidebar = () => {
             key={item.name}
             to={item.path}
             className={cn(
-              "flex items-center p-2 rounded-lg text-sm font-medium transition-colors duration-200",
+              "flex items-center p-3 rounded-lg text-sm font-medium transition-colors duration-200",
               location.pathname === item.path
                 ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-mac-sm"
                 : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             )}
           >
             <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
-            <span className="whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="whitespace-nowrap">
               {item.name}
             </span>
           </Link>
         ))}
       </nav>
-      <div className="mt-auto pt-4 border-t border-sidebar-border">
+      <div className="mt-auto pt-4 border-t border-sidebar-border space-y-2">
+        {bottomNavItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={cn(
+              "flex items-center p-3 rounded-lg text-sm font-medium transition-colors duration-200",
+              location.pathname === item.path
+                ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-mac-sm"
+                : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            )}
+          >
+            <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+            <span className="whitespace-nowrap">
+              {item.name}
+            </span>
+          </Link>
+        ))}
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg cursor-pointer"
+          className="w-full justify-start text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg cursor-pointer p-3"
         >
           <LogOut className="h-5 w-5 mr-3 flex-shrink-0" />
-          <span className="whitespace-nowrap overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="whitespace-nowrap">
             Logout
           </span>
         </Button>
