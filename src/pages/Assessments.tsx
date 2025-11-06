@@ -199,7 +199,7 @@ const Assessments = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nama Penilaian</TableHead>
+                    <TableHead>Nama Penilaian</TableHead> {/* Corrected header */}
                     <TableHead>Kelas</TableHead>
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Jenis</TableHead>
@@ -212,8 +212,8 @@ const Assessments = () => {
                 <TableBody>
                   {assessments.map((assessment) => (
                     <TableRow key={assessment.id}>
-                      <TableCell className="font-medium">{assessment.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell>
-                      <TableCell>{assessment.nama_penilaian}</TableCell>
+                      <TableCell className="font-medium">{assessment.nama_penilaian}</TableCell> {/* Corrected: Display Nama Penilaian */}
+                      <TableCell>{assessment.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell> {/* Corrected: Display Kelas */}
                       <TableCell>{new Date(assessment.tanggal).toLocaleDateString()}</TableCell>
                       <TableCell>{assessment.jenis_penilaian}</TableCell>
                       <TableCell>{assessment.bentuk_penilaian}</TableCell>
