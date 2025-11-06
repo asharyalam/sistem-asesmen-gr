@@ -147,7 +147,7 @@ const Dashboard = () => {
             {isLoadingClasses && totalClasses === 0 ? (
               <Skeleton className="h-10 w-1/2 bg-classesAccent/50" />
             ) : (
-              <div className="text-4xl font-bold">{totalClasses}</div> {/* Using totalClasses as proxy */}
+              <div className="text-4xl font-bold">{totalClasses}</div>
             )}
           </CardContent>
         </Card>
@@ -156,13 +156,13 @@ const Dashboard = () => {
         <Card className="rounded-xl shadow-mac-md bg-studentsAccent text-studentsAccent-foreground hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Classrooms</CardTitle>
-            <Book className="h-6 w-6" /> {/* Using Book icon for classrooms */}
+            <Book className="h-6 w-6" />
           </CardHeader>
           <CardContent>
             {isLoadingClasses && totalClasses === 0 ? (
               <Skeleton className="h-10 w-1/2 bg-studentsAccent/50" />
             ) : (
-              <div className="text-4xl font-bold">{totalClasses}</div> {/* Using totalClasses */}
+              <div className="text-4xl font-bold">{totalClasses}</div>
             )}
           </CardContent>
         </Card>
