@@ -73,7 +73,7 @@ const Dashboard = () => {
   });
 
   // Fetch recent activities
-  const { data: recentActivities, isLoading: isLoadingActivities } = useQuery<ActivityLog[], Error>({
+  const { data: recentActivities, isLoading: isLoadingActivities, isError: isErrorActivities, error: activitiesError } = useQuery<ActivityLog[], Error>({
     queryKey: ['recentActivities', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -95,7 +95,8 @@ const Dashboard = () => {
     if (isErrorClasses) console.error("Error fetching total classes:", classesError);
     if (isErrorUserClassIds) console.error("Error fetching user class IDs:", userClassIdsError);
     if (isErrorStudents) console.error("Error fetching total students:", studentsError);
-  }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError]);
+    if (isErrorActivities) console.error("Error fetching recent activities:", activitiesError); // Added this line
+  }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError, isErrorActivities, activitiesError]); // Updated dependencies
 
   return (
     <div className="flex-1 space-y-8">
