@@ -149,7 +149,7 @@ const Dashboard = () => {
             {isLoadingClasses && totalClasses === 0 ? (
               <Skeleton className="h-10 w-1/2" />
             ) : (
-              <div className="text-4xl font-bold text-foreground">{totalClasses}</div> {/* Using totalClasses */}
+              <div className="text-4xl font-bold text-foreground">{totalClasses}</div> /* Using totalClasses */
             )}
             <p className="text-sm text-red-600 mt-2">
               {/* Placeholder for percentage change */}
