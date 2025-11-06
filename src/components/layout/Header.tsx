@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Search, Bell, ChevronDown, CalendarDays } from 'lucide-react';
+import { Search, Bell, ChevronDown } from 'lucide-react'; // Removed CalendarDays
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -34,8 +34,8 @@ const Header = () => {
 
   return (
     <header className="flex items-center justify-between h-16 px-6 bg-card border-b border-border shadow-mac-sm rounded-xl mb-6">
-      <div className="flex-1 flex items-center justify-center"> {/* Centering the search bar */}
-        <div className="relative w-full max-w-xl"> {/* Wider search bar */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="relative w-full max-w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -45,11 +45,8 @@ const Header = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4 ml-4"> {/* Added ml-4 for spacing */}
-        <Button variant="outline" className="rounded-lg px-3 py-2 h-auto text-muted-foreground hover:bg-muted">
-          <CalendarDays className="mr-2 h-4 w-4" />
-          <span>Ubah Periode</span>
-        </Button>
+      <div className="flex items-center space-x-4 ml-4">
+        {/* Removed "Ubah Periode" button */}
 
         <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
           <Bell className="h-5 w-5 text-muted-foreground" />

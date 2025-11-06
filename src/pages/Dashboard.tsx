@@ -3,14 +3,14 @@
 import React, { useEffect } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Book, Users, ClipboardList, History, GraduationCap, Monitor, BookOpen } from 'lucide-react'; // Updated icons
+import { Book, Users, ClipboardList, History, GraduationCap, Monitor, BookOpen } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { id } from 'date-fns/locale'; // Import locale for Indonesian date formatting
-import { logActivity } from '@/utils/activityLogger'; // Import logActivity
+import { id } from 'date-fns/locale';
+import { logActivity } from '@/utils/activityLogger';
 
 interface ActivityLog {
   id: string;
@@ -22,7 +22,7 @@ interface ActivityLog {
 const Dashboard = () => {
   const { user } = useSession();
   const navigate = useNavigate();
-  const queryClient = useQueryClient(); // Get queryClient here
+  const queryClient = useQueryClient();
 
   // Fetch total classes
   const { data: totalClasses = 0, isLoading: isLoadingClasses, isError: isErrorClasses, error: classesError } = useQuery<number, Error>({
@@ -69,23 +69,7 @@ const Dashboard = () => {
       if (error) throw new Error(error.message);
       return count || 0;
     },
-    enabled: !!user && !isLoadingUserClassIds, // Simplified condition
-  });
-
-  // Fetch total active assessments using the fetched class IDs
-  const { data: totalAssessments = 0, isLoading: isLoadingAssessments, isError: isErrorAssessments, error: assessmentsError } = useQuery<number, Error>({
-    queryKey: ['totalAssessments', user?.id, userClassIds],
-    queryFn: async () => {
-      if (!user || !userClassIds || userClassIds.length === 0) return 0;
-      const { count, error } = await supabase
-        .from('penilaian')
-        .select('id', { count: 'exact', head: true })
-        .in('id_kelas', userClassIds);
-
-      if (error) throw new Error(error.message);
-      return count || 0;
-    },
-    enabled: !!user && !isLoadingUserClassIds, // Simplified condition
+    enabled: !!user && !isLoadingUserClassIds,
   });
 
   // Fetch recent activities
@@ -111,8 +95,7 @@ const Dashboard = () => {
     if (isErrorClasses) console.error("Error fetching total classes:", classesError);
     if (isErrorUserClassIds) console.error("Error fetching user class IDs:", userClassIdsError);
     if (isErrorStudents) console.error("Error fetching total students:", studentsError);
-    if (isErrorAssessments) console.error("Error fetching total assessments:", assessmentsError);
-  }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError, isErrorAssessments, assessmentsError]);
+  }, [isErrorClasses, classesError, isErrorUserClassIds, userClassIdsError, isErrorStudents, studentsError]);
 
   return (
     <div className="flex-1 space-y-8">
@@ -121,7 +104,7 @@ const Dashboard = () => {
         <p className="text-sm text-muted-foreground">Welcome, System!</p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2"> {/* Adjusted grid columns */}
         {/* Total Students Card */}
         <Card className="rounded-xl shadow-mac-md bg-dashboardAccent text-dashboardAccent-foreground hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -129,25 +112,10 @@ const Dashboard = () => {
             <GraduationCap className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? (
+            {(isLoadingStudents || isLoadingUserClassIds) ? (
               <Skeleton className="h-10 w-1/2 bg-dashboardAccent/50" />
             ) : (
               <div className="text-4xl font-bold">{totalStudents}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Total Teachers Card */}
-        <Card className="rounded-xl shadow-mac-md bg-classesAccent text-classesAccent-foreground hover:shadow-mac-lg transition-shadow duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">Total Teachers</CardTitle>
-            <Users className="h-6 w-6" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingClasses && totalClasses === 0 ? (
-              <Skeleton className="h-10 w-1/2 bg-classesAccent/50" />
-            ) : (
-              <div className="text-4xl font-bold">{totalClasses}</div>
             )}
           </CardContent>
         </Card>
@@ -159,25 +127,10 @@ const Dashboard = () => {
             <Book className="h-6 w-6" />
           </CardHeader>
           <CardContent>
-            {isLoadingClasses && totalClasses === 0 ? (
+            {isLoadingClasses ? (
               <Skeleton className="h-10 w-1/2 bg-studentsAccent/50" />
             ) : (
               <div className="text-4xl font-bold">{totalClasses}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Subjects Card */}
-        <Card className="rounded-xl shadow-mac-md bg-assessmentsAccent text-assessmentsAccent-foreground hover:shadow-mac-lg transition-shadow duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">Subjects</CardTitle>
-            <BookOpen className="h-6 w-6" />
-          </CardHeader>
-          <CardContent>
-            {(isLoadingAssessments || isLoadingUserClassIds) && totalAssessments === 0 ? (
-              <Skeleton className="h-10 w-1/2 bg-assessmentsAccent/50" />
-            ) : (
-              <div className="text-4xl font-bold">{totalAssessments}</div>
             )}
           </CardContent>
         </Card>
