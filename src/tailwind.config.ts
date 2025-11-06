@@ -62,38 +62,38 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom accent colors for each page - MADE MORE VIBRANT AND DARKER
+        // Custom accent colors for each page - matching screenshot
         dashboardAccent: {
-          DEFAULT: "hsl(210 70% 50%)", // Blueish
+          DEFAULT: "hsl(210, 100%, 56%)", // Blue for Total Students
           foreground: "hsl(210 40% 98%)",
         },
         classesAccent: {
-          DEFAULT: "hsl(142.1 76.2% 36.3%)", // Greenish
+          DEFAULT: "hsl(145, 63%, 49%)", // Green for Total Teachers
           foreground: "hsl(210 40% 98%)",
         },
         studentsAccent: {
-          DEFAULT: "hsl(262.1 90% 40%)", // Darker Purplish
-          foreground: "hsl(0 0% 100%)", // White text
+          DEFAULT: "hsl(45, 100%, 51%)", // Yellow for Classrooms
+          foreground: "hsl(210 40% 98%)",
         },
         assessmentsAccent: {
-          DEFAULT: "hsl(38.5 92.7% 50.6%)", // Orangish
+          DEFAULT: "hsl(195, 100%, 50%)", // Light Blue for Subjects
           foreground: "hsl(210 40% 98%)",
         },
         attendanceAccent: {
-          DEFAULT: "hsl(180 80% 25%)", // Darker Teal
-          foreground: "hsl(0 0% 100%)", // White text
+          DEFAULT: "hsl(180 80% 25%)", // Darker Teal (kept existing for consistency with other pages)
+          foreground: "hsl(0 0% 100%)",
         },
         weightSettingsAccent: {
-          DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink
-          foreground: "hsl(0 0% 100%)", // White text
+          DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink (kept existing for consistency with other pages)
+          foreground: "hsl(0 0% 100%)",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "1rem", // Added for larger rounded corners
-        "2xl": "1.5rem", // Added for even larger rounded corners
+        xl: "1.25rem", // Adjusted for larger rounded corners
+        "2xl": "1.75rem", // Adjusted for even larger rounded corners
       },
       boxShadow: {
         "mac-sm": "0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)",
