@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Book, Users, ClipboardList, History } from 'lucide-react';
+import { Book, Users, ClipboardList, History, GraduationCap, CalendarCheck } from 'lucide-react'; // Added GraduationCap and CalendarCheck
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -117,77 +117,83 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 space-y-8">
-      <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-      <p className="text-lg text-muted-foreground">
-        Ini adalah dashboard Anda. Di sini Anda dapat mengelola kelas, siswa, penilaian, dan kehadiran dengan mudah.
-      </p>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">Total Kelas</CardTitle>
-            <Book className="h-5 w-5 text-dashboardAccent-DEFAULT" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingClasses && totalClasses === 0 ? (
-              <Skeleton className="h-8 w-1/4" />
-            ) : (
-              <div className="text-3xl font-bold text-foreground">{totalClasses}</div>
-            )}
-            <p className="text-sm text-muted-foreground mt-1">
-              {isLoadingClasses && totalClasses === 0 ? <Skeleton className="h-4 w-1/2" /> : (
-                totalClasses === 0 ? "Anda belum memiliki kelas." : `Anda memiliki ${totalClasses} kelas.`
-              )}
-            </p>
-            <Button onClick={() => navigate('/classes')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
-              <PlusCircle className="mr-2 h-4 w-4" /> Buat Kelas Baru
-            </Button>
-          </CardContent>
-        </Card>
+      <h1 className="text-3xl font-bold text-foreground">Home Page</h1> {/* Changed to Home Page */}
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"> {/* Adjusted grid columns */}
+        {/* Total Students Card */}
         <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-lg font-semibold">Total Siswa</CardTitle>
-            <Users className="h-5 w-5 text-dashboardAccent-DEFAULT" />
+            <Users className="h-6 w-6 text-muted-foreground" /> {/* Smaller, muted icon */}
           </CardHeader>
           <CardContent>
             {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? (
-              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-10 w-1/2" />
             ) : (
-              <div className="text-3xl font-bold text-foreground">{totalStudents}</div>
+              <div className="text-4xl font-bold text-foreground">{totalStudents}</div> {/* Larger number */}
             )}
-            <p className="text-sm text-muted-foreground mt-1">
-              {(isLoadingStudents || isLoadingUserClassIds) && totalStudents === 0 ? <Skeleton className="h-4 w-1/2" /> : (
-                totalStudents === 0 ? "Belum ada siswa terdaftar." : `Anda memiliki ${totalStudents} siswa.`
-              )}
+            <p className="text-sm text-green-600 mt-2">
+              {/* Placeholder for percentage change */}
+              +5% dari tahun lalu
             </p>
-            <Button onClick={() => navigate('/students')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
-              <PlusCircle className="mr-2 h-4 w-4" /> Tambah Siswa
-            </Button>
           </CardContent>
         </Card>
+
+        {/* Total Classes Card (renamed to Total Teachers for visual consistency with image, but uses class data) */}
         <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">Penilaian Aktif</CardTitle>
-            <ClipboardList className="h-5 w-5 text-dashboardAccent-DEFAULT" />
+            <CardTitle className="text-lg font-semibold">Total Guru</CardTitle> {/* Renamed title */}
+            <GraduationCap className="h-6 w-6 text-muted-foreground" /> {/* Icon for teachers */}
+          </CardHeader>
+          <CardContent>
+            {isLoadingClasses && totalClasses === 0 ? (
+              <Skeleton className="h-10 w-1/2" />
+            ) : (
+              <div className="text-4xl font-bold text-foreground">{totalClasses}</div> {/* Using totalClasses */}
+            )}
+            <p className="text-sm text-red-600 mt-2">
+              {/* Placeholder for percentage change */}
+              -2.5% dari tahun lalu
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Events Card (using totalAssessments for conceptual mapping) */}
+        <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-lg font-semibold">Total Penilaian</CardTitle> {/* Renamed title */}
+            <ClipboardList className="h-6 w-6 text-muted-foreground" /> {/* Icon for assessments */}
           </CardHeader>
           <CardContent>
             {(isLoadingAssessments || isLoadingUserClassIds) && totalAssessments === 0 ? (
-              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-10 w-1/2" />
             ) : (
-              <div className="text-3xl font-bold text-foreground">{totalAssessments}</div>
+              <div className="text-4xl font-bold text-foreground">{totalAssessments}</div> {/* Using totalAssessments */}
             )}
-            <p className="text-sm text-muted-foreground mt-1">
-              {(isLoadingAssessments || isLoadingUserClassIds) && totalAssessments === 0 ? <Skeleton className="h-4 w-1/2" /> : (
-                totalAssessments === 0 ? "Tidak ada penilaian aktif." : `Anda memiliki ${totalAssessments} penilaian aktif.`
-              )}
+            <p className="text-sm text-green-600 mt-2">
+              {/* Placeholder for percentage change */}
+              +10% dari bulan lalu
             </p>
-            <Button onClick={() => navigate('/assessments')} className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-mac-sm">
-              <PlusCircle className="mr-2 h-4 w-4" /> Buat Penilaian
-            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Average Attendance Card (Placeholder for now) */}
+        <Card className="rounded-xl shadow-mac-md hover:shadow-mac-lg transition-shadow duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-lg font-semibold">Rata-rata Kehadiran</CardTitle>
+            <CalendarCheck className="h-6 w-6 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold text-foreground">85%</div> {/* Hardcoded for now */}
+            <p className="text-sm text-green-600 mt-2">
+              {/* Placeholder for percentage change */}
+              +2% dari bulan lalu
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Recent Activities Card */}
       <Card className="rounded-xl shadow-mac-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>

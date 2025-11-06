@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 200 60% 96%; /* Very light blueish grey for main background */
+    --background: 0 0% 98%; /* Very light grey for main background */
     --foreground: 222.2 84% 4.9%; /* Dark text */
 
     --card: 0 0% 100%; /* White card background */
@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 200 100% 40%; /* Vibrant blue accent */
+    --primary: 250 80% 60%; /* Vibrant purple accent */
     --primary-foreground: 0 0% 100%; /* White text on primary */
 
     --secondary: 210 40% 96.1%; /* Lighter grey for secondary elements */
@@ -30,18 +30,18 @@
 
     --border: 210 20% 90%; /* Light grey border */
     --input: 210 20% 90%;
-    --ring: 200 100% 40%; /* Ring color matches primary accent */
+    --ring: 250 80% 60%; /* Ring color matches primary accent */
 
-    --radius: 1rem; /* Larger border radius for softer look */
+    --radius: 0.75rem; /* Slightly smaller border radius for softer look */
 
-    --sidebar-background: 200 100% 35%; /* Deep, vibrant blue for sidebar */
-    --sidebar-foreground: 0 0% 100%; /* White text for sidebar */
-    --sidebar-primary: 0 0% 100%; /* White for active sidebar items */
-    --sidebar-primary-foreground: 200 100% 35%; /* Blue text on active sidebar items */
-    --sidebar-accent: 200 100% 45%; /* Slightly lighter blue for sidebar hover */
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 200 100% 30%; /* Darker blue border for sidebar */
-    --sidebar-ring: 200 100% 40%;
+    --sidebar-background: 0 0% 100%; /* White for sidebar */
+    --sidebar-foreground: 215.4 16.3% 46.9%; /* Muted text for sidebar */
+    --sidebar-primary: 250 80% 60%; /* Vibrant purple for active sidebar items */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on active sidebar items */
+    --sidebar-accent: 210 40% 96.1%; /* Lighter grey for sidebar hover */
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 210 20% 90%; /* Light grey border for sidebar */
+    --sidebar-ring: 250 80% 60%;
   }
 
   .dark {
@@ -54,8 +54,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%; /* Vibrant blue accent */
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 250 80% 60%; /* Vibrant purple accent */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -71,16 +71,16 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 91.2% 59.8%;
+    --ring: 250 80% 60%;
     
     --sidebar-background: 222.2 84% 4.9%; /* Dark sidebar */
     --sidebar-foreground: 210 40% 98%; /* Light text for sidebar */
-    --sidebar-primary: 217.2 91.2% 59.8%; /* Primary accent for active sidebar items */
+    --sidebar-primary: 250 80% 60%; /* Primary accent for active sidebar items */
     --sidebar-primary-foreground: 0 0% 100%; /* White text on active sidebar items */
     --sidebar-accent: 217.2 32.6% 17.5%; /* Darker accent for sidebar hover */
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 250 80% 60%;
   }
 }
 

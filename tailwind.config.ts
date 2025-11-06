@@ -64,7 +64,7 @@ export default {
         },
         // Custom accent colors for each page - MADE MORE VIBRANT AND DARKER
         dashboardAccent: {
-          DEFAULT: "hsl(200 100% 40%)", // Blueish, matching new primary
+          DEFAULT: "hsl(250 80% 60%)", // Purple, matching new primary
           foreground: "hsl(210 40% 98%)",
         },
         classesAccent: {
