@@ -45,11 +45,11 @@ interface Penilaian {
   id_kelas: string;
   kelas: {
     nama_kelas: string;
-  } | null; // Updated type
+  }[] | null; // Updated type
   id_kategori_bobot_akhir: string | null;
   kategori_bobot: {
     nama_kategori: string;
-  } | null; // Updated type
+  }[] | null; // Updated type
   created_at: string;
 }
 
@@ -212,13 +212,13 @@ const Assessments = () => {
                 <TableBody>
                   {assessments.map((assessment) => (
                     <TableRow key={assessment.id}>
-                      <TableCell className="font-medium">{assessment.kelas?.nama_kelas || 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{assessment.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell>
                       <TableCell>{assessment.nama_penilaian}</TableCell>
                       <TableCell>{new Date(assessment.tanggal).toLocaleDateString()}</TableCell>
                       <TableCell>{assessment.jenis_penilaian}</TableCell>
                       <TableCell>{assessment.bentuk_penilaian}</TableCell>
                       <TableCell>{assessment.kode_tp || '-'}</TableCell>
-                      <TableCell>{assessment.kategori_bobot?.nama_kategori || '-'}</TableCell>
+                      <TableCell>{assessment.kategori_bobot?.[0]?.nama_kategori || '-'}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"

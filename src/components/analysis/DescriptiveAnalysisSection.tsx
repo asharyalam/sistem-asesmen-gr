@@ -110,10 +110,10 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
   const classPerformanceSummary = useMemo(() => {
     if (!allScores || allScores.length === 0 || !students || students.length === 0) return null;
 
-    const totalAverage = calculateClassAverage(allScores, students as Siswa[]);
+    const totalAverage = calculateClassAverage(allScores, students);
 
     const studentAverages: { studentId: string; average: number; nama_siswa: string }[] = [];
-    (students as Siswa[]).forEach(student => {
+    students.forEach(student => {
       const studentScores = allScores.filter(s => s.id_siswa === student.id);
       const studentAvg = calculateClassAverage(studentScores, [student]);
       studentAverages.push({ studentId: student.id, average: studentAvg, nama_siswa: student.nama_siswa });
@@ -141,20 +141,20 @@ const DescriptiveAnalysisSection: React.FC<DescriptiveAnalysisSectionProps> = ({
     const scoresByAssessment: { [assessmentId: string]: { totalScore: number; maxPossibleScore: number; date: string; name: string } } = {};
     studentScores.forEach(score => {
       // Mengakses penilaian melalui aspek_penilaian, tambahkan pemeriksaan null
-      if (!score.aspek_penilaian || !score.aspek_penilaian.penilaian) {
+      if (!score.aspek_penilaian || score.aspek_penilaian.length === 0 || !score.aspek_penilaian[0]?.penilaian || score.aspek_penilaian[0].penilaian.length === 0) {
         return; // Lewati jika data bersarang tidak ada
       }
-      const assessmentId = score.aspek_penilaian.penilaian.id;
+      const assessmentId = score.aspek_penilaian[0].penilaian[0].id;
       if (!scoresByAssessment[assessmentId]) {
         scoresByAssessment[assessmentId] = {
           totalScore: 0,
           maxPossibleScore: 0,
-          date: score.aspek_penilaian.penilaian.tanggal,
-          name: score.aspek_penilaian.penilaian.nama_penilaian,
+          date: score.aspek_penilaian[0].penilaian[0].tanggal,
+          name: score.aspek_penilaian[0].penilaian[0].nama_penilaian,
         };
       }
       scoresByAssessment[assessmentId].totalScore += score.skor_diperoleh;
-      scoresByAssessment[assessmentId].maxPossibleScore += score.aspek_penilaian.skor_maksimal;
+      scoresByAssessment[assessmentId].maxPossibleScore += score.aspek_penilaian[0].skor_maksimal;
     });
 
     const trendData = Object.values(scoresByAssessment)

@@ -11,7 +11,7 @@ export interface Siswa {
   id_kelas: string; // Added for direct reference
   kelas: {
     nama_kelas: string;
-  } | null; // Changed to object or null
+  }[] | null; // Changed to array of objects or null
 }
 
 export interface Penilaian {
@@ -25,10 +25,10 @@ export interface Penilaian {
   id_kategori_bobot_akhir: string | null; // Added for direct reference
   kelas: {
     nama_kelas: string;
-  } | null; // Changed to object or null
+  }[] | null; // Changed to array of objects or null
   kategori_bobot?: { // Made optional as it might not always be selected
     nama_kategori: string;
-  } | null; // Changed to object or null
+  }[] | null; // Changed to array of objects or null
 }
 
 export interface AspekPenilaian {
@@ -41,14 +41,14 @@ export interface AspekPenilaian {
 
 // New interface to represent the fetched aspect with nested assessment
 export interface FetchedAspekPenilaian extends AspekPenilaian {
-  penilaian: Penilaian | null; // Changed to object or null
+  penilaian: Penilaian[] | null; // Changed to array of objects or null
 }
 
 export interface NilaiAspekSiswa {
   id_siswa: string;
   id_aspek: string;
   skor_diperoleh: number;
-  aspek_penilaian: FetchedAspekPenilaian | null; // Changed to object or null
+  aspek_penilaian: FetchedAspekPenilaian[] | null; // Changed to array of objects or null
 }
 
 export interface KehadiranRecord {

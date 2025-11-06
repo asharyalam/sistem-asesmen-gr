@@ -25,7 +25,7 @@ interface Penilaian {
   id_kelas: string;
   kelas: {
     nama_kelas: string;
-  } | null; // Updated type
+  }[] | null; // Updated type
 }
 
 interface AspekPenilaian {
@@ -232,7 +232,7 @@ const ScoreInput = () => {
       showSuccess("Nilai berhasil disimpan!");
       queryClient.invalidateQueries({ queryKey: ['existingScores', selectedAssessmentId] });
       // Log activity, passing queryClient
-      await logActivity(user, 'SCORE_SAVED', `Menyimpan nilai untuk penilaian: ${currentAssessment?.nama_penilaian} (${currentAssessment?.kelas?.nama_kelas})`, queryClient);
+      await logActivity(user, 'SCORE_SAVED', `Menyimpan nilai untuk penilaian: ${currentAssessment?.nama_penilaian} (${currentAssessment?.kelas?.[0]?.nama_kelas})`, queryClient);
     } catch (error: any) {
       showError("Gagal menyimpan nilai: " + error.message);
     }
@@ -292,7 +292,7 @@ const ScoreInput = () => {
               ) : assessments && assessments.length > 0 ? (
                 assessments.map((assessment) => (
                   <SelectItem key={assessment.id} value={assessment.id}>
-                    {assessment.nama_penilaian} ({assessment.kelas?.nama_kelas})
+                    {assessment.nama_penilaian} ({assessment.kelas?.[0]?.nama_kelas})
                   </SelectItem>
                 ))
               ) : (
@@ -356,7 +356,7 @@ const ScoreInput = () => {
       {selectedAssessmentId && students && students.length > 0 && aspects && aspects.length > 0 && (
         <Card className="rounded-xl shadow-mac-md">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Input Nilai untuk {currentAssessment?.nama_penilaian} ({currentAssessment?.kelas?.nama_kelas})</CardTitle>
+            <CardTitle className="text-lg font-semibold">Input Nilai untuk {currentAssessment?.nama_penilaian} ({currentAssessment?.kelas?.[0]?.nama_kelas})</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingStudents || isLoadingAspects || isLoadingExistingScores ? (

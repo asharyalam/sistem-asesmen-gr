@@ -45,7 +45,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
           kode_tp,
           id_kategori_bobot_akhir,
           id_kelas,
-          kelas (id_guru)
+          kelas (nama_kelas)
         `)
         .eq('kelas.id_guru', user.id)
         .order('nama_penilaian', { ascending: true });
@@ -53,7 +53,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data as Penilaian[] || []; // Explicitly cast data to Penilaian[]
+      return data as Penilaian[] || [];
     },
     enabled: !!user && activeTab === 'relational',
   });
@@ -72,7 +72,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data as AspekPenilaian[] || []; // Explicitly cast data to AspekPenilaian[]
+      return data as AspekPenilaian[] || [];
     },
     enabled: !!selectedRelationAssessmentId && activeTab === 'relational',
   });
@@ -104,7 +104,7 @@ const RelationalAnalysisSection: React.FC<RelationalAnalysisSectionProps> = ({
       if (error) {
         throw new Error(error.message);
       }
-      return data as NilaiAspekSiswa[] || []; // Explicitly cast data to NilaiAspekSiswa[]
+      return data as NilaiAspekSiswa[] || [];
     },
     enabled: !!selectedRelationAssessmentId && !!selectedRelationAspectId1 && !!selectedRelationAspectId2 && activeTab === 'relational',
   });

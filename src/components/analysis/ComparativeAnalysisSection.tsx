@@ -77,6 +77,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
             id,
             deskripsi,
             skor_maksimal,
+            urutan,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
           )
@@ -102,6 +103,7 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
             id,
             deskripsi,
             skor_maksimal,
+            urutan,
             id_penilaian,
             penilaian (id, nama_penilaian, tanggal, jenis_penilaian, bentuk_penilaian, id_kelas)
           )
@@ -123,8 +125,8 @@ const ComparativeAnalysisSection: React.FC<ComparativeAnalysisSectionProps> = ({
   const comparativeAnalysisData = useMemo(() => {
     if (!comparisonScores1 || !comparisonScores2 || !classes || !studentsClass1 || !studentsClass2) return [];
 
-    const avg1 = calculateClassAverage(comparisonScores1, studentsClass1 as Siswa[]);
-    const avg2 = calculateClassAverage(comparisonScores2, studentsClass2 as Siswa[]);
+    const avg1 = calculateClassAverage(comparisonScores1, studentsClass1);
+    const avg2 = calculateClassAverage(comparisonScores2, studentsClass2);
 
     const className1 = classes.find(c => c.id === selectedComparisonClassId1)?.nama_kelas || 'Kelas 1';
     const className2 = classes.find(c => c.id === selectedComparisonClassId2)?.nama_kelas || 'Kelas 2';

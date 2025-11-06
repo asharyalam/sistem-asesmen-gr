@@ -40,7 +40,7 @@ interface Siswa {
   id_kelas: string;
   kelas: {
     nama_kelas: string;
-  } | null; // Updated type
+  }[] | null; // Updated type
   created_at: string;
 }
 
@@ -189,8 +189,7 @@ const Students = () => {
                   {students.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell className="font-medium">{student.nama_siswa}</TableCell>
-                      <TableCell>{student.nis_nisn}</TableCell>
-                      <TableCell>{student.kelas?.nama_kelas || 'N/A'}</TableCell>
+                      <TableCell>{student.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell>
                       <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <Button
