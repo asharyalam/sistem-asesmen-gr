@@ -24,6 +24,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import { logActivity } from '@/utils/activityLogger';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Kelas {
   id: string;
@@ -43,19 +51,29 @@ const Classes = () => {
   const [classToDeleteName, setClassToDeleteName] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of items per page
+  const [totalItems, setTotalItems] = useState(0);
+
   const { data: classes, isLoading, isError, error } = useQuery<Kelas[], Error>({
-    queryKey: ['classes', user?.id],
+    queryKey: ['classes', user?.id, currentPage], // Add currentPage to queryKey
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage - 1;
+
+      const { data, error, count } = await supabase
         .from('kelas')
-        .select('id, nama_kelas, tahun_semester, created_at')
+        .select('id, nama_kelas, tahun_semester, created_at', { count: 'exact' })
         .eq('id_guru', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(startIndex, endIndex); // Apply range for pagination
 
       if (error) {
         throw new Error(error.message);
       }
+      setTotalItems(count || 0); // Update total items for pagination
       return data || [];
     },
     enabled: !!user,
@@ -63,6 +81,7 @@ const Classes = () => {
 
   const handleClassAdded = () => {
     queryClient.invalidateQueries({ queryKey: ['classes', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['totalClasses', user?.id] }); // Invalidate total classes for dashboard
   };
 
   const handleEditClick = (kelas: Kelas) => {
@@ -105,6 +124,8 @@ const Classes = () => {
     showError("Gagal memuat kelas: " + error?.message);
   }
 
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
   return (
     <div className="flex-1 space-y-8 p-4">
       <h1 className="text-4xl font-extrabold text-classesAccent-DEFAULT">Manajemen Kelas</h1>
@@ -144,43 +165,73 @@ const Classes = () => {
               <Skeleton className="h-10 w-full rounded-lg" />
             </div>
           ) : classes && classes.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama Kelas</TableHead>
-                  <TableHead>Tahun/Semester</TableHead>
-                  <TableHead>Dibuat Pada</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {classes.map((kelas) => (
-                  <TableRow key={kelas.id}>
-                    <TableCell className="font-medium">{kelas.nama_kelas}</TableCell>
-                    <TableCell>{kelas.tahun_semester}</TableCell>
-                    <TableCell>{new Date(kelas.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:bg-primary/10"
-                        onClick={() => handleEditClick(kelas)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" /> Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteClick(kelas.id, kelas.nama_kelas)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" /> Hapus
-                      </Button>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama Kelas</TableHead>
+                    <TableHead>Tahun/Semester</TableHead>
+                    <TableHead>Dibuat Pada</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {classes.map((kelas) => (
+                    <TableRow key={kelas.id}>
+                      <TableCell className="font-medium">{kelas.nama_kelas}</TableCell>
+                      <TableCell>{kelas.tahun_semester}</TableCell>
+                      <TableCell>{new Date(kelas.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary hover:bg-primary/10"
+                          onClick={() => handleEditClick(kelas)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteClick(kelas.id, kelas.nama_kelas)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Hapus
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {totalPages > 1 && (
+                <Pagination className="mt-4">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
           ) : (
             <p className="text-muted-foreground">Belum ada kelas yang terdaftar.</p>
           )}
