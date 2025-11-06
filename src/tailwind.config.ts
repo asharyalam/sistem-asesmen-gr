@@ -62,30 +62,30 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom accent colors for each page - matching screenshot
+        // Custom accent colors for each page - MADE MORE VIBRANT AND DARKER
         dashboardAccent: {
-          DEFAULT: "hsl(210, 100%, 56%)", // Blue for Total Students
+          DEFAULT: "hsl(250 80% 60%)", // Purple, matching new primary
           foreground: "hsl(210 40% 98%)",
         },
         classesAccent: {
-          DEFAULT: "hsl(145, 63%, 49%)", // Green for Total Teachers
+          DEFAULT: "hsl(142.1 76.2% 36.3%)", // Greenish
           foreground: "hsl(210 40% 98%)",
         },
         studentsAccent: {
-          DEFAULT: "hsl(45, 100%, 51%)", // Yellow for Classrooms
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(262.1 90% 40%)", // Darker Purplish
+          foreground: "hsl(0 0% 100%)", // White text
         },
         assessmentsAccent: {
-          DEFAULT: "hsl(195, 100%, 50%)", // Light Blue for Subjects
+          DEFAULT: "hsl(38.5 92.7% 50.6%)", // Orangish
           foreground: "hsl(210 40% 98%)",
         },
         attendanceAccent: {
-          DEFAULT: "hsl(180 80% 25%)", // Darker Teal (kept existing for consistency with other pages)
-          foreground: "hsl(0 0% 100%)",
+          DEFAULT: "hsl(180 80% 25%)", // Darker Teal
+          foreground: "hsl(0 0% 100%)", // White text
         },
         weightSettingsAccent: {
-          DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink (kept existing for consistency with other pages)
-          foreground: "hsl(0 0% 100%)",
+          DEFAULT: "hsl(350 90% 45%)", // Darker Reddish-pink
+          foreground: "hsl(0 0% 100%)", // White text
         },
       },
       borderRadius: {
