@@ -189,9 +189,9 @@ const Students = () => {
                   {students.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell className="font-medium">{student.nama_siswa}</TableCell>
-                      <TableCell>{student.nis_nisn}</TableCell> {/* Corrected: Display NIS/NISN */}
-                      <TableCell>{student.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell> {/* Corrected: Display Class Name */}
-                      <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>{student.nis_nisn}</TableCell> {/* NIS/NISN */}
+                      <TableCell>{student.kelas?.[0]?.nama_kelas || 'N/A'}</TableCell> {/* Nama Kelas */}
+                      <TableCell>{new Date(student.created_at).toLocaleDateString()}</TableCell> {/* Dibuat Pada */}
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
